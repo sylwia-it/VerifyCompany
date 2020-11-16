@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace VerifyCompany.Common.Lib
+﻿namespace VerifyCompany.Common.Lib
 {
     public class Company
     {

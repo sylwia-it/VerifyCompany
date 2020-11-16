@@ -59,7 +59,7 @@ namespace VerifyNIPActivePayer.Lib
             {
                 if (company == null)
                 {
-                    throw new ArgumentNullException("company", "One element of the companiesToVerify is null.");
+                    throw new NullReferenceException("One element of the companiesToVerify is null.");
                 }
                 var verificationResult = VerifyNIP(company.NIP);
                 result.Add(company.ID, verificationResult);
