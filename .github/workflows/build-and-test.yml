@@ -23,8 +23,7 @@ jobs:
       run: dotnet build --configuration Release --no-restore
     - name: Test
       run: dotnet test --no-restore --filter "(FullyQualifiedName!~Production)"
- 
-   - name: Cache SonarCloud packages
+    - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
           path: ~\sonar\cache
