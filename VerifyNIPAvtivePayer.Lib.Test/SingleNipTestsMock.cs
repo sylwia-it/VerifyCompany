@@ -1,5 +1,6 @@
 using Moq;
 using NUnit.Framework;
+using VerifyCompany.Common.Test.Lib;
 using VerifyNIP.Service;
 using VerifyNIPActivePayer.Lib;
 
@@ -8,15 +9,14 @@ namespace VerifyNIPAvtivePayer.Lib.Test
     public class SingleNipTestsMock
     {
         private NIPActivePayerVerifier _verifier;
-        private readonly string _correctNIP = "5250005834";
-        private readonly string _incorrectNIP = "1234";
+       
 
         [OneTimeSetUp]
         public void Setup()
         {
             Mock<WeryfikacjaVAT> clientMock = new Mock<WeryfikacjaVAT>();
-            clientMock.Setup(c => c.SprawdzNIP(It.Is<SprawdzNIPZapytanie>(z => z.NIP==_correctNIP))).Returns(new SprawdzNIPOdpowiedz() { WynikOperacji = new TWynikWeryfikacjiVAT() { Kod = TKodWeryfikacjiVAT.C } });
-            clientMock.Setup(c => c.SprawdzNIP(It.Is<SprawdzNIPZapytanie>(z => z.NIP == _incorrectNIP))).Returns(new SprawdzNIPOdpowiedz() { WynikOperacji = new TWynikWeryfikacjiVAT() { Kod = TKodWeryfikacjiVAT.I } });
+            clientMock.Setup(c => c.SprawdzNIP(It.Is<SprawdzNIPZapytanie>(z => z.NIP==CompanyGenerator.GetCorrectNIP(1)))).Returns(new SprawdzNIPOdpowiedz() { WynikOperacji = new TWynikWeryfikacjiVAT() { Kod = TKodWeryfikacjiVAT.C } });
+            clientMock.Setup(c => c.SprawdzNIP(It.Is<SprawdzNIPZapytanie>(z => z.NIP == CompanyGenerator.GetInCorrectNIP(1)))).Returns(new SprawdzNIPOdpowiedz() { WynikOperacji = new TWynikWeryfikacjiVAT() { Kod = TKodWeryfikacjiVAT.I } });
 
 
 
@@ -28,7 +28,7 @@ namespace VerifyNIPAvtivePayer.Lib.Test
         [Test]
         public void OneCorrectNipVerification()
         {
-            VerifyNIPResult response = _verifier.VerifyNIP(_correctNIP);
+            VerifyNIPResult response = _verifier.VerifyNIP(CompanyGenerator.GetCorrectNIP(1));
             Assert.AreEqual(VerifyNIPResult.IsActiveVATPayer, response);
         }
 
@@ -55,7 +55,7 @@ namespace VerifyNIPAvtivePayer.Lib.Test
         [Test]
         public void IncorrectNipVerification()
         {
-            VerifyNIPResult response = _verifier.VerifyNIP(_incorrectNIP);
+            VerifyNIPResult response = _verifier.VerifyNIP(CompanyGenerator.GetInCorrectNIP(1));
             Assert.AreEqual(VerifyNIPResult.NIPNotCorrect, response);
         }
 

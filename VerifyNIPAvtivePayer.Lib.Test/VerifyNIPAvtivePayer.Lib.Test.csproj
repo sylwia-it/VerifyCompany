@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\VerifyCompany.Common.Test.Lib\VerifyCompany.Common.Test.Lib.csproj" />
     <ProjectReference Include="..\VerifyNIPActivePayer.Lib\VerifyNIPActivePayer.Lib.csproj" />
   </ItemGroup>
 

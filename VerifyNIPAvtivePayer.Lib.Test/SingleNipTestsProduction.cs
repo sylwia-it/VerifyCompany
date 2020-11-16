@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using VerifyCompany.Common.Test.Lib;
 using VerifyNIPActivePayer.Lib;
 
 namespace VerifyNIPAvtivePayer.Lib.Test
@@ -16,7 +17,7 @@ namespace VerifyNIPAvtivePayer.Lib.Test
         [Test]
         public void OneCorrectNipVerification()
         {
-            VerifyNIPResult response = verifier.VerifyNIP("5250005834");
+            VerifyNIPResult response = verifier.VerifyNIP(CompanyGenerator.GetCorrectNIP(1));
             Assert.AreEqual(VerifyNIPResult.IsActiveVATPayer, response);
         }
 
@@ -37,7 +38,7 @@ namespace VerifyNIPAvtivePayer.Lib.Test
         [Test]
         public void IncorrectNipVerification()
         {
-            VerifyNIPResult response = verifier.VerifyNIP("1234");
+            VerifyNIPResult response = verifier.VerifyNIP(CompanyGenerator.GetInCorrectNIP(1));
             Assert.AreEqual(VerifyNIPResult.NIPNotCorrect, response);
         }
 
