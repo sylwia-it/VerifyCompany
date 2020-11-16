@@ -42,4 +42,12 @@
         
     }
 
+    public static class Extentions
+    {
+        public static string ToMessage(this VerifyNIPResult verifyNIPResult)
+        {
+            return VerifyNIPResultMsg.GetMsg(verifyNIPResult);
+        }
+    }
+
 }

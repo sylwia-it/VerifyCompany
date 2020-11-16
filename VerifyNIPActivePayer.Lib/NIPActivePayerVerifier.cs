@@ -4,7 +4,6 @@ using System.ServiceModel;
 using System.Threading;
 using VerifyCompany.Common.Lib;
 using VerifyNIP.Service;
-using static VerifyNIP.Service.WeryfikacjaVATClient;
 
 namespace VerifyNIPActivePayer.Lib
 {
@@ -60,7 +59,7 @@ namespace VerifyNIPActivePayer.Lib
             {
                 if (company == null)
                 {
-                    throw new ArgumentNullException("element of companiesToVerify", "One of the companiesToVerify is null.");
+                    throw new ArgumentNullException("company", "One element of the companiesToVerify is null.");
                 }
                 var verificationResult = VerifyNIP(company.NIP);
                 result.Add(company.ID, verificationResult);

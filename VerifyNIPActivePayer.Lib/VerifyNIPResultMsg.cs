@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace VerifyNIPActivePayer.Lib
+﻿namespace VerifyNIPActivePayer.Lib
 {
-    internal class VerifyNIPResultMsg
+    internal static class VerifyNIPResultMsg
     {
         private const string _isActiveVATPayerMsg = "Podatnik jest czynnym podatnikiem VAT.";
         private const string _notRegisteredVATPayer = "Podatnik NIE jest zarejestrowany jako podatnik VAT.";

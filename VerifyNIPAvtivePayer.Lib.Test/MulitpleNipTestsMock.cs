@@ -11,34 +11,30 @@ namespace VerifyNIPAvtivePayer.Lib.Test
     public class MulitpleNipTestsMock
     {
         private NIPActivePayerVerifier _verifier;
-        private string _correctNIP1 = "5250005834";
-        private string _correctNIP2 = "7792348141";
-        private string _correctNIP3 = "7811767696";
-        private string _correctNIP4 = "7781454968";
-        private string _correctNIP5 = "7781424849";
-        private string _correctNIP6 = "7822261960";
+        private readonly string _correctNIP1 = "5250005834";
+        private readonly string _correctNIP2 = "7792348141";
+        private readonly string _correctNIP3 = "7811767696";
+        private readonly string _correctNIP4 = "7781454968";
+        private readonly string _correctNIP5 = "7781424849";
 
+        private readonly string _correctID1 = "c1";
+        private readonly string _correctID2 = "c2";
+        private readonly string _correctID3 = "c3";
+        private readonly string _correctID4 = "c4";
+        private readonly string _correctID5 = "c5";
+        
+        private readonly string _incorrectNIP1 = "1234";
+        private readonly string _incorrectNIP2 = "779-234-81-41";
+        private readonly string _incorrectNIP3 = "789009";
+        private readonly string _incorrectNIP4 = "34k3444";
+        private readonly string _incorrectNIP5 = "14555";
 
-        private string _correctID1 = "c1";
-        private string _correctID2 = "c2";
-        private string _correctID3 = "c3";
-        private string _correctID4 = "c4";
-        private string _correctID5 = "c5";
-        private string _correctID6 = "c6";
-
-        private string _incorrectNIP1 = "1234";
-        private string _incorrectNIP2 = "779-234-81-41";
-        private string _incorrectNIP3 = "789009";
-        private string _incorrectNIP4 = "34k3444";
-        private string _incorrectNIP5 = "14555";
-        private string _incorrectNIP6 = "11111110";
-
-        private string _incorrectID1 = "ic1";
-        private string _incorrectID2 = "ic2";
-        private string _incorrectID3 = "ic3";
-        private string _incorrectID4 = "ic4";
-        private string _incorrectID5 = "ic5";
-        private string _incorrectID6 = "ic6";
+        private readonly string _incorrectID1 = "ic1";
+        private readonly string _incorrectID2 = "ic2";
+        private readonly string _incorrectID3 = "ic3";
+        private readonly string _incorrectID4 = "ic4";
+        private readonly string _incorrectID5 = "ic5";
+        
 
         private List<Company> _companiesToCheck;
 
@@ -100,9 +96,9 @@ namespace VerifyNIPAvtivePayer.Lib.Test
         public void TimeForFullListNipVerification()
         {
             DateTime startTime = DateTime.Now;
-            var verificationResults = _verifier.VerifyNIPs(_companiesToCheck);
+            _verifier.VerifyNIPs(_companiesToCheck);
             DateTime stopTime = DateTime.Now;
-            
+
             Assert.GreaterOrEqual((stopTime - startTime).TotalMilliseconds, 1000);
         }
 

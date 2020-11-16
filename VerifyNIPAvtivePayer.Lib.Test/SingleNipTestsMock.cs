@@ -8,8 +8,8 @@ namespace VerifyNIPAvtivePayer.Lib.Test
     public class SingleNipTestsMock
     {
         private NIPActivePayerVerifier _verifier;
-        private string _correctNIP = "5250005834";
-        private string _incorrectNIP = "1234";
+        private readonly string _correctNIP = "5250005834";
+        private readonly string _incorrectNIP = "1234";
 
         [OneTimeSetUp]
         public void Setup()

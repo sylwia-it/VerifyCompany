@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using VerifyNIP.Service;
+﻿using VerifyNIP.Service;
 
 namespace VerifyNIPActivePayer.Lib
 {
-   public static class WeryfikacjaVATClientFactory
+    public static class WeryfikacjaVATClientFactory
     {
         private static WeryfikacjaVAT _client;
         public static WeryfikacjaVAT GetWeryfikacjaVATClient()
