@@ -1,3 +1,5 @@
+![.NET Core](https://github.com/sylwia-it/VerifyCompany/workflows/.NET%20Core/badge.svg?event=push)
+
 # Verify Company
 
 ## What's Verify Company
