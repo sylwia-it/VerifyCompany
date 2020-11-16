@@ -41,7 +41,7 @@ jobs:
       shell: pwsh
       run: |
         New-Item -Path .\.sonar\scanner -ItemType Directory  
-        dotnet tool install --global dotnet-sonarscanner --version 4.8.0 --tool-path .\.sonar\scanner
+        dotnet tool install --tool-path .\.sonar\scanner dotnet-sonarscanner --version 4.8.0 
     - name: Build and analyze
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
