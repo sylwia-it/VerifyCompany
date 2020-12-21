@@ -12,18 +12,20 @@ namespace VerifyCompany.Common.Test.Lib
         private static readonly string _correctNIP3 = "7811767696";
         private static readonly string _correctNIP4 = "7781454968";
         private static readonly string _correctNIP5 = "7781424849";
+        private static readonly string _correctPhisicalCompanyNIP1 = "9471862705";
 
         private static readonly string _correctID1 = "c1";
         private static readonly string _correctID2 = "c2";
         private static readonly string _correctID3 = "c3";
         private static readonly string _correctID4 = "c4";
         private static readonly string _correctID5 = "c5";
+        private static readonly string _correctPhisicalCompanyID1 = "phc1";
 
         private static readonly string _incorrectNIP1 = "1234";
-        private static readonly string _incorrectNIP2 = "779-234-81-41";
-        private static readonly string _incorrectNIP3 = "789009";
+        private static readonly string _incorrectNIP2 = "9999999999";
+        private static readonly string _incorrectNIP3 = "78 9009";
         private static readonly string _incorrectNIP4 = "34k3444";
-        private static readonly string _incorrectNIP5 = "14555";
+        private static readonly string _incorrectNIP5 = "14-555";
 
         private static readonly string _incorrectID1 = "ic1";
         private static readonly string _incorrectID2 = "ic2";
@@ -37,14 +39,23 @@ namespace VerifyCompany.Common.Test.Lib
         private static List<Company> _correctCompanies;
         private static List<Company> _incorrectCompanies;
 
-        public static Dictionary<string, string> Companies { get; private set; }
+        public static Dictionary<string, string> CompaniesNIPIDDic { get; private set; }
+        private static Dictionary<string, Company> _correctPhisicalCompanyDic;
+        private static Dictionary<string, Company> _correctCompaniesDic;
 
         private static bool _isSetUp = false;
 
         protected CompanyGenerator() { }
 
         private static Random _random;
+        private static Dictionary<string, Company> _incorrectNipCompaniesDic;
 
+        public static Dictionary<string, Company> GetCorrectPhisicalCompanies()
+        {
+            if (!_isSetUp)
+            { SetUp(); }
+            return _correctPhisicalCompanyDic;
+        }
         public static string GetCorrectNIP()
         {
             if (!_isSetUp)
@@ -77,6 +88,25 @@ namespace VerifyCompany.Common.Test.Lib
         }
 
 
+
+        public static Dictionary<string, Company> GetCorrectCompanies()
+        {
+            if (!_isSetUp)
+            { SetUp(); }
+
+            return _correctCompaniesDic;
+        }
+
+        public static Dictionary<string, Company> GetInCorrectNipCompanies()
+        {
+            if (!_isSetUp)
+            { SetUp(); }
+
+            return _incorrectNipCompaniesDic;
+        }
+
+
+
         private static void SetUp()
         {
             _random = new Random((int)DateTime.Now.Ticks);
@@ -101,7 +131,7 @@ namespace VerifyCompany.Common.Test.Lib
                 new Company(){ NIP = _incorrectNIP5, ID = _incorrectID5}
             };
 
-            Companies = new Dictionary<string, string>
+            CompaniesNIPIDDic = new Dictionary<string, string>
             {
                 { _correctNIP1, _correctID1 },
                 { _correctNIP2, _correctID2 },
@@ -114,6 +144,34 @@ namespace VerifyCompany.Common.Test.Lib
                 { _incorrectNIP3, _incorrectID3 },
                 { _incorrectNIP4, _incorrectID4 },
                 { _incorrectNIP5, _incorrectID5 }
+            };
+
+            _correctCompaniesDic = new Dictionary<string, Company>()
+            {
+                { _correctCompanies[0].ID, _correctCompanies[0] },
+                { _correctCompanies[1].ID, _correctCompanies[1] },
+                { _correctCompanies[2].ID, _correctCompanies[2] },
+                { _correctCompanies[3].ID, _correctCompanies[3] },
+                { _correctCompanies[4].ID, _correctCompanies[4] },
+               
+
+            };
+
+            _incorrectNipCompaniesDic = new Dictionary<string, Company>()
+            {
+                { _incorrectCompanies[0].ID, _incorrectCompanies[0] },
+                { _incorrectCompanies[1].ID, _incorrectCompanies[1] },
+                { _incorrectCompanies[2].ID, _incorrectCompanies[2] },
+                { _incorrectCompanies[3].ID, _incorrectCompanies[3] },
+                { _incorrectCompanies[4].ID, _incorrectCompanies[4] },
+
+
+            };
+
+            _correctPhisicalCompanyDic = new Dictionary<string, Company>()
+            {
+                {_correctPhisicalCompanyID1, new Company(){NIP = _correctPhisicalCompanyNIP1} }
+            
             };
 
             _isSetUp = true;

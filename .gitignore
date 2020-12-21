@@ -7,3 +7,12 @@
 /VerifyCompany.Common.Lib/obj
 /VerifyCompany.Common.Test.Lib/bin
 /VerifyCompany.Common.Test.Lib/obj
+/VerifyActiveCompany.Lib/BiRSettings.config
+/VerifyActiveCompany.Lib/obj
+/VerifyActiveCompany.Lib/bin
+/VerifyActiveCompany.Lib.Test/obj
+/VerifyActiveCompany.Lib.Test/bin
+/VerifyActive.Org.Lib.Test/bin/Debug/netcoreapp3.1
+netcoreapp3.1
+obj
+packages

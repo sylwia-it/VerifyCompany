@@ -17,7 +17,7 @@ namespace VerifyNIPAvtivePayer.Lib.Test
             Mock<WeryfikacjaVAT> clientMock = new Mock<WeryfikacjaVAT>();
             clientMock.Setup(c => c.SprawdzNIP(It.Is<SprawdzNIPZapytanie>(z => z.NIP==CompanyGenerator.GetCorrectNIP(1)))).Returns(new SprawdzNIPOdpowiedz() { WynikOperacji = new TWynikWeryfikacjiVAT() { Kod = TKodWeryfikacjiVAT.C } });
             clientMock.Setup(c => c.SprawdzNIP(It.Is<SprawdzNIPZapytanie>(z => z.NIP == CompanyGenerator.GetInCorrectNIP(1)))).Returns(new SprawdzNIPOdpowiedz() { WynikOperacji = new TWynikWeryfikacjiVAT() { Kod = TKodWeryfikacjiVAT.I } });
-
+            
 
 
             WeryfikacjaVATClientFactory.SetWeryfikacjaVATClinet(clientMock.Object);

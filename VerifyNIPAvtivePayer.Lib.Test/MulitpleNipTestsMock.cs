@@ -40,17 +40,17 @@ namespace VerifyNIPAvtivePayer.Lib.Test
         {
             var verificationResults = _verifier.VerifyNIPs(CompanyGenerator.GetAllCompanies());
 
-            Assert.AreEqual(VerifyNIPResult.IsActiveVATPayer, verificationResults[CompanyGenerator.Companies[CompanyGenerator.GetCorrectNIP(1)]]);
-            Assert.AreEqual(VerifyNIPResult.IsActiveVATPayer, verificationResults[CompanyGenerator.Companies[CompanyGenerator.GetCorrectNIP(2)]]);
-            Assert.AreEqual(VerifyNIPResult.IsActiveVATPayer, verificationResults[CompanyGenerator.Companies[CompanyGenerator.GetCorrectNIP(3)]]);
-            Assert.AreEqual(VerifyNIPResult.IsActiveVATPayer, verificationResults[CompanyGenerator.Companies[CompanyGenerator.GetCorrectNIP(4)]]);
-            Assert.AreEqual(VerifyNIPResult.IsActiveVATPayer, verificationResults[CompanyGenerator.Companies[CompanyGenerator.GetCorrectNIP(0)]]);
+            Assert.AreEqual(VerifyNIPResult.IsActiveVATPayer, verificationResults[CompanyGenerator.CompaniesNIPIDDic[CompanyGenerator.GetCorrectNIP(1)]]);
+            Assert.AreEqual(VerifyNIPResult.IsActiveVATPayer, verificationResults[CompanyGenerator.CompaniesNIPIDDic[CompanyGenerator.GetCorrectNIP(2)]]);
+            Assert.AreEqual(VerifyNIPResult.IsActiveVATPayer, verificationResults[CompanyGenerator.CompaniesNIPIDDic[CompanyGenerator.GetCorrectNIP(3)]]);
+            Assert.AreEqual(VerifyNIPResult.IsActiveVATPayer, verificationResults[CompanyGenerator.CompaniesNIPIDDic[CompanyGenerator.GetCorrectNIP(4)]]);
+            Assert.AreEqual(VerifyNIPResult.IsActiveVATPayer, verificationResults[CompanyGenerator.CompaniesNIPIDDic[CompanyGenerator.GetCorrectNIP(0)]]);
 
-            Assert.AreEqual(VerifyNIPResult.NIPNotCorrect, verificationResults[CompanyGenerator.Companies[CompanyGenerator.GetInCorrectNIP(1)]]);
-            Assert.AreEqual(VerifyNIPResult.NIPNotCorrect, verificationResults[CompanyGenerator.Companies[CompanyGenerator.GetInCorrectNIP(2)]]);
-            Assert.AreEqual(VerifyNIPResult.NIPNotCorrect, verificationResults[CompanyGenerator.Companies[CompanyGenerator.GetInCorrectNIP(3)]]);
-            Assert.AreEqual(VerifyNIPResult.NIPNotCorrect, verificationResults[CompanyGenerator.Companies[CompanyGenerator.GetInCorrectNIP(4)]]);
-            Assert.AreEqual(VerifyNIPResult.NIPNotCorrect, verificationResults[CompanyGenerator.Companies[CompanyGenerator.GetInCorrectNIP(0)]]);
+            Assert.AreEqual(VerifyNIPResult.NIPNotCorrect, verificationResults[CompanyGenerator.CompaniesNIPIDDic[CompanyGenerator.GetInCorrectNIP(1)]]);
+            Assert.AreEqual(VerifyNIPResult.NIPNotCorrect, verificationResults[CompanyGenerator.CompaniesNIPIDDic[CompanyGenerator.GetInCorrectNIP(2)]]);
+            Assert.AreEqual(VerifyNIPResult.NIPNotCorrect, verificationResults[CompanyGenerator.CompaniesNIPIDDic[CompanyGenerator.GetInCorrectNIP(3)]]);
+            Assert.AreEqual(VerifyNIPResult.NIPNotCorrect, verificationResults[CompanyGenerator.CompaniesNIPIDDic[CompanyGenerator.GetInCorrectNIP(4)]]);
+            Assert.AreEqual(VerifyNIPResult.NIPNotCorrect, verificationResults[CompanyGenerator.CompaniesNIPIDDic[CompanyGenerator.GetInCorrectNIP(0)]]);
 
         }
 
