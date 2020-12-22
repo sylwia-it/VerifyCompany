@@ -24,9 +24,11 @@ jobs:
     - name: Setup MSBuild Path
       uses: microsoft/setup-msbuild@v1.0.2
     - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1.0.2
-    - name: Restore NuGet Packages
-      run: nuget restore VerifyCompany.sln
+    - uses: nuget/setup-nuget@v1
+      with:
+        nuget-api-key: ${{ secrets.NuGetAPIKey }}
+        nuget-version: '5.x'
+    - run: nuget restore CompanyVerify.sln
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
