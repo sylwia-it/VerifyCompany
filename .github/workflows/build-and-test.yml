@@ -21,6 +21,12 @@ jobs:
         dotnet-version: 3.1.301
     - name: Install dependencies
       run: dotnet restore
+    - name: Setup MSBuild Path
+      uses: warrenbuckley/Setup-MSBuild@v1
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.2
+    - name: Restore NuGet Packages
+      run: nuget restore VerifyCompany.sln
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
