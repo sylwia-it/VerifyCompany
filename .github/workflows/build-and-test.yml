@@ -29,7 +29,7 @@ jobs:
         nuget-api-key: ${{ secrets.NuGetAPIKey }}
         nuget-version: '5.x'
     - name: Run NuGet
-      run: nuget restore CompanyVerify.sln
+      run: nuget restore VerifyCompany.sln
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
