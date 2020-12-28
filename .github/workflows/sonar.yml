@@ -1,0 +1,48 @@
+name: Sonar - Quality
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+
+    runs-on: linux-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Setup MSBuild Path
+      uses: microsoft/setup-msbuild@v1.0.2
+    - name: Setup NuGet
+      uses: nuget/setup-nuget@v1
+      with:
+        nuget-api-key: ${{ secrets.NuGetAPIKey }}
+        nuget-version: '5.x'
+    - name: Run NuGet
+      run: nuget restore VerifyCompany.sln
+      
+    - name: Sonarscanner for dotnet
+      uses: Secbyte/dotnet-sonarscanner@v2.3
+      with:
+        buildCommand: dotnet build .
+        testCommand: dotnet test .
+        projectKey: sylwia-it_VerifyCompany
+        projectName: VerifyCompany
+        sonarOrganisation: koptools
+        beginArguments: >
+          /d:sonar.verbose="true"
+          /d:sonar.cs.opencover.reportsPaths='"/path/to/coverage.xml","/path/to/coverage.2.xml"'
+          /d:sonar.coverage.exclusions='"**/*.cs","**/*.md"'
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
