@@ -32,6 +32,14 @@ jobs:
       run: nuget restore VerifyCompany.sln
     - name: Build VerifyCompany.Common.Lib
       run: dotnet build VerifyCompany.Common.Lib --configuration Release --no-restore
+    - name: Build VerifyCompany.Common.Test.Lib
+      run: dotnet build VerifyCompany.Common.Test.Lib --configuration Release --no-restore
+    - name: BuildVerifyNIPActivePayer.Lib.Test
+      run: dotnet build VerifyNIPActivePayer.Lib.Test --configuration Release --no-restore
+    - name: Build VerifyActiveCompany.Lib
+      run: dotnet build VerifyActiveCompany.Lib --configuration Release --no-restore
+    - name: Build VerifyActiveCompany.Lib.Test
+      run: dotnet build VerifyActiveCompany.Lib.Test --configuration Release --no-restore
     - name: Test
       run: dotnet test --no-restore --filter "(FullyQualifiedName!~Production)"
     - name: Sonarscanner for dotnet
