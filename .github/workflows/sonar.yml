@@ -28,14 +28,14 @@ jobs:
         nuget-version: '5.x'
     - name: Run NuGet
       run: nuget restore VerifyCompany.sln
-	- name: Sonar1
-	  uses: mathrix-education/sonar-scanner@master
-	  with:
+    - name: Sonar1
+      uses: mathrix-education/sonar-scanner@master
+      with:
         version: 4.2.0.1873 # required
         typescript: true
         scan: true
-		args: --debug -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-	- name: SonarCloud Scan
+        args: --debug -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+    - name: SonarCloud Scan
       uses: sonarsource/sonarcloud-github-action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
