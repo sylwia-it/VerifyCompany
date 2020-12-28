@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\VerifyActiveCompany.Lib.Test\VerifyActiveCompany.Lib.Test.csproj" />
-    <ProjectReference Include="..\VerifyCompany.Common.Lib\VerifyCompany.Common.Lib.csproj" />
+    <ProjectReference Include="..\VerifyCompany.Common.Lib\VerifyCompany.Common.Lib.csproj" AdditionalProperties="TargetFramework=netcoreapp3.1"/>
   </ItemGroup>
 
   <ItemGroup>
