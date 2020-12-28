@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -14,8 +14,25 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VerifyCompany.Common.Test.Lib\VerifyCompany.Common.Test.Lib.csproj" />
     <ProjectReference Include="..\VerifyNIPActivePayer.Lib\VerifyNIPActivePayer.Lib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Reference Include="VerifyCompany.Common.Test.Lib">
+      <HintPath>..\VerifyCompany.Common.Test.Lib\bin\Debug\netcoreapp3.1\VerifyCompany.Common.Test.Lib.dll</HintPath>
+    </Reference>
+    <Reference Include="VerifyCompany.Common.Lib">
+      <HintPath>..\VerifyCompany.Common.Lib\bin\Debug\netcoreapp3.1\VerifyCompany.Common.Lib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Reference Include="VerifyCompany.Common.Test.Lib">
+      <HintPath>..\VerifyCompany.Common.Test.Lib\bin\Release\netcoreapp3.1\VerifyCompany.Common.Test.Lib.dll</HintPath>
+    </Reference>
+    <Reference Include="VerifyCompany.Common.Lib">
+      <HintPath>..\VerifyCompany.Common.Lib\bin\Release\netcoreapp3.1\VerifyCompany.Common.Lib.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
