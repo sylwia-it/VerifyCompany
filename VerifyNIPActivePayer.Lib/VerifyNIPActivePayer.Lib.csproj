@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -13,7 +13,18 @@
 
   <ItemGroup>
     <ProjectReference Include="..\VerifyActiveCompany.Lib.Test\VerifyActiveCompany.Lib.Test.csproj" />
-    <ProjectReference Include="..\VerifyCompany.Common.Lib\VerifyCompany.Common.Lib.csproj" AdditionalProperties="TargetFramework=netcoreapp3.1"/>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Reference Include="VerifyCompany.Common.Lib">
+      <HintPath>..\VerifyCompany.Common.Lib\bin\Debug\net472\VerifyCompany.Common.Lib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Reference Include="VerifyCompany.Common.Lib">
+      <HintPath>..\VerifyCompany.Common.Lib\bin\Release\net472\VerifyCompany.Common.Lib.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
