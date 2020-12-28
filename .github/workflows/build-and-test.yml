@@ -30,8 +30,8 @@ jobs:
         nuget-version: '5.x'
     - name: Run NuGet
       run: nuget restore VerifyCompany.sln
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
+    - name: Build VerifyCompany.Common.Lib
+      run: dotnet build VerifyCompany.Common.Lib --configuration Release --no-restore
     - name: Test
       run: dotnet test --no-restore --filter "(FullyQualifiedName!~Production)"
     - name: Sonarscanner for dotnet
