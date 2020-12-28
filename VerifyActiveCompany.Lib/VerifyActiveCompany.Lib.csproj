@@ -50,7 +50,7 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="VerifyCompany.Common.Lib">
-      <HintPath>..\VerifyCompany.Common.Lib\bin\Debug\net472\VerifyCompany.Common.Lib.dll</HintPath>
+      <HintPath>..\VerifyCompany.Common.Lib\bin\$(Configuration)\net472\VerifyCompany.Common.Lib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
