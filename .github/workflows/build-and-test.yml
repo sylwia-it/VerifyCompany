@@ -36,7 +36,7 @@ jobs:
     - name: Build VerifyCompany.Common.Test.Lib
       run: dotnet build VerifyCompany.Common.Test.Lib --configuration Release --no-restore
     - name: Build VerifyNIPActivePayer.Lib
-      run: dotnet build VerifyNIPActivePayer.Lib --configuration Release --no-restore
+      run: dotnet build VerifyNIPActivePayer.Lib --info --configuration Release --no-restore
     - name: Build VerifyNIPActivePayer.Lib.Test
       run: dotnet build VerifyNIPActivePayer.Lib.Test --configuration Release --no-restore
     - name: Build VerifyActiveCompany.Lib
