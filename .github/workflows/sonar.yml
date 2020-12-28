@@ -30,9 +30,10 @@ jobs:
       run: nuget restore VerifyCompany.sln
     - name: SonarCloud Scan
       uses: sonarsource/sonarcloud-github-action@master
-      args: >
-        -Dsonar.organization=koptools
-        -Dsonar.projectKey=sylwia-it_VerifyCompany
+      with:
+        args: >
+          -Dsonar.organization=koptools
+          -Dsonar.projectKey=sylwia-it_VerifyCompany
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}      
