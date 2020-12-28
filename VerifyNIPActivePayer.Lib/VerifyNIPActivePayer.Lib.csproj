@@ -23,7 +23,7 @@
 
   <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Reference Include="VerifyCompany.Common.Lib">
-      <HintPath>..\VerifyCompany.Common.Lib\bin\Release\netcoreapp3.1\VerifyCompany.Common.Lib.dll</HintPath>
+      <HintPath>D:\a\VerifyCompany\VerifyCompany\VerifyCompany.Common.Lib\bin\Release\netcoreapp3.1\VerifyCompany.Common.Lib.dll</HintPath>
     </Reference>
   </ItemGroup>
 
