@@ -30,6 +30,8 @@ jobs:
       run: nuget restore VerifyCompany.sln
     - name: Sonar1
       uses: mathrix-education/sonar-scanner@master
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       with:
         version: 4.2.0.1873 # required
         typescript: true
