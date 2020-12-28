@@ -58,6 +58,14 @@
     <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.1\lib\netstandard2.0\System.Threading.Tasks.Extensions.dll</HintPath>
     </Reference>
+    <Reference Include="VerifyCompany.Common.Lib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\VerifyCompany.Common.Lib\bin\Debug\net472\VerifyCompany.Common.Lib.dll</HintPath>
+    </Reference>
+    <Reference Include="VerifyCompany.Common.Test.Lib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\VerifyCompany.Common.Test.Lib\bin\Debug\net472\VerifyCompany.Common.Test.Lib.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataHelpers\TestBiRClientHelper.cs" />
@@ -77,14 +85,6 @@
     <ProjectReference Include="..\VerifyActiveCompany.Lib\VerifyActiveCompany.Lib.csproj">
       <Project>{403aed9e-4186-4918-9646-a8c46708c40b}</Project>
       <Name>VerifyActiveCompany.Lib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\VerifyCompany.Common.Lib\VerifyCompany.Common.Lib.csproj">
-      <Project>{1d5c239a-48fe-492d-8e48-e5e5060c2864}</Project>
-      <Name>VerifyCompany.Common.Lib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\VerifyCompany.Common.Test.Lib\VerifyCompany.Common.Test.Lib.csproj">
-      <Project>{d7b63287-5728-4302-9170-b722b5141b4e}</Project>
-      <Name>VerifyCompany.Common.Test.Lib</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

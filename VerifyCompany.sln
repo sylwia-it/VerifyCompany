@@ -4,16 +4,29 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VerifyNIPActivePayer.Lib", "VerifyNIPActivePayer.Lib\VerifyNIPActivePayer.Lib.csproj", "{31AAE47B-151B-468A-A00D-25F39B531221}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1D5C239A-48FE-492D-8E48-E5E5060C2864} = {1D5C239A-48FE-492D-8E48-E5E5060C2864}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VerifyNIPActivePayer.Lib.Test", "VerifyNIPAvtivePayer.Lib.Test\VerifyNIPActivePayer.Lib.Test.csproj", "{2652B1D0-BBEF-45F7-BA09-B3F891F09F10}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1D5C239A-48FE-492D-8E48-E5E5060C2864} = {1D5C239A-48FE-492D-8E48-E5E5060C2864}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VerifyCompany.Common.Lib", "VerifyCompany.Common.Lib\VerifyCompany.Common.Lib.csproj", "{1D5C239A-48FE-492D-8E48-E5E5060C2864}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VerifyCompany.Common.Test.Lib", "VerifyCompany.Common.Test.Lib\VerifyCompany.Common.Test.Lib.csproj", "{D7B63287-5728-4302-9170-B722B5141B4E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VerifyActiveCompany.Lib", "VerifyActiveCompany.Lib\VerifyActiveCompany.Lib.csproj", "{403AED9E-4186-4918-9646-A8C46708C40B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1D5C239A-48FE-492D-8E48-E5E5060C2864} = {1D5C239A-48FE-492D-8E48-E5E5060C2864}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VerifyActiveCompany.Lib.Test", "VerifyActiveCompany.Lib.Test\VerifyActiveCompany.Lib.Test.csproj", "{4D9E56AF-CDF8-46CE-A3C9-DEAC72069685}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7B63287-5728-4302-9170-B722B5141B4E} = {D7B63287-5728-4302-9170-B722B5141B4E}
+		{1D5C239A-48FE-492D-8E48-E5E5060C2864} = {1D5C239A-48FE-492D-8E48-E5E5060C2864}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
