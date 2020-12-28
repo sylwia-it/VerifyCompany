@@ -28,15 +28,6 @@ jobs:
         nuget-version: '5.x'
     - name: Run NuGet
       run: nuget restore VerifyCompany.sln
-    - name: Sonar1
-      uses: mathrix-education/sonar-scanner@master
-      env:
-        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-      with:
-        version: 4.2.0.1873 # required
-        typescript: true
-        scan: true
-        args: --debug -Dsonar.login=${{ secrets.SONAR_TOKEN }}
     - name: SonarCloud Scan
       uses: sonarsource/sonarcloud-github-action@master
       env:
@@ -45,8 +36,6 @@ jobs:
     - name: Sonarscanner for dotnet
       uses: Secbyte/dotnet-sonarscanner@v2.3
       with:
-        buildCommand: dotnet build .
-        testCommand: dotnet test .
         projectKey: sylwia-it_VerifyCompany
         projectName: VerifyCompany
         sonarOrganisation: koptools
