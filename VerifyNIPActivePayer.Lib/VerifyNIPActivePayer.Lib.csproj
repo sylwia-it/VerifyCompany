@@ -11,10 +11,6 @@
     <PackageReference Include="System.ServiceModel.Security" Version="4.4.*" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\VerifyActiveCompany.Lib.Test\VerifyActiveCompany.Lib.Test.csproj" />
-  </ItemGroup>
-
   <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <Reference Include="VerifyCompany.Common.Lib">
       <HintPath>..\VerifyCompany.Common.Lib\bin\Debug\netcoreapp3.1\VerifyCompany.Common.Lib.dll</HintPath>
@@ -23,7 +19,7 @@
 
   <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Reference Include="VerifyCompany.Common.Lib">
-      <HintPath>D:\a\VerifyCompany\VerifyCompany\VerifyCompany.Common.Lib\bin\Release\netcoreapp3.1\VerifyCompany.Common.Lib.dll</HintPath>
+      <HintPath>..\VerifyCompany.Common.Lib\bin\Release\netcoreapp3.1\VerifyCompany.Common.Lib.dll</HintPath>
     </Reference>
   </ItemGroup>
 
