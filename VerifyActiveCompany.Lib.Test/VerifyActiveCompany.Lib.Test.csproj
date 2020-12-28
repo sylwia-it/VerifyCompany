@@ -60,11 +60,11 @@
     </Reference>
     <Reference Include="VerifyCompany.Common.Lib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\VerifyCompany.Common.Lib\bin\Debug\net472\VerifyCompany.Common.Lib.dll</HintPath>
+      <HintPath>..\VerifyCompany.Common.Lib\bin\$(Configuration)\net472\VerifyCompany.Common.Lib.dll</HintPath>
     </Reference>
     <Reference Include="VerifyCompany.Common.Test.Lib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\VerifyCompany.Common.Test.Lib\bin\Debug\net472\VerifyCompany.Common.Test.Lib.dll</HintPath>
+      <HintPath>..\VerifyCompany.Common.Test.Lib\bin\$(Configuration)\net472\VerifyCompany.Common.Test.Lib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
