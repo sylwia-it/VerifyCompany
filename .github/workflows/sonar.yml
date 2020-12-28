@@ -21,8 +21,6 @@ jobs:
         dotnet-version: 3.1.301
     - name: Install dependencies
       run: dotnet restore
-    - name: Setup MSBuild Path
-      uses: microsoft/setup-msbuild@v1.0.2
     - name: Setup NuGet
       uses: nuget/setup-nuget@v1
       with:
