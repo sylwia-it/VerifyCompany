@@ -28,14 +28,11 @@ jobs:
         nuget-version: '5.x'
     - name: Run NuGet
       run: nuget restore VerifyCompany.sln
-    - name: SonarCloud Scan
-      uses: sonarsource/sonarcloud-github-action@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}      
+
     - name: Sonarscanner for dotnet
       uses: Secbyte/dotnet-sonarscanner@v2.3
       with:
+        buildCommand: dotnet build VerifyCompany.Common.Lib
         projectKey: sylwia-it_VerifyCompany
         projectName: VerifyCompany
         sonarOrganisation: koptools
