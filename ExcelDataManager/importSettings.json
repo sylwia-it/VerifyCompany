@@ -1,0 +1,84 @@
+{
+  "InputSheetNameExclude": [ "pivot" ],
+  "InputColumnsConfig": [
+    {
+      "ID": "LP",
+      "HeaderText": "Lp"
+    },
+    {
+      "ID": "Nip",
+      "HeaderText": "Nip"
+    },
+    {
+      "ID": "PaymentDate",
+      "HeaderText": "data płatności"
+    },
+    {
+      "ID": "AccountNumber",
+      "HeaderText": "konto bankowe"
+    },
+    {
+      "ID": "NoteID",
+      "HeaderText": "nr noty"
+    },
+    {
+      "ID": "NoteAmount",
+      "HeaderText": "kwota"
+    },
+    {
+      "ID": "NoteDate",
+      "HeaderText": "data"
+    },
+    {
+      "ID": "NoteTitle",
+      "HeaderText": "tytuł"
+    }
+  ],
+  "ExportStartLettersInHeader": "WER.",
+  "ExportColumnsConfig": [
+    {
+      "ID": "ALLVerificationStatusHeader",
+      "HeaderText": "WER. Status Weryfikacji Podmiotu"
+    },
+    {
+      "ID": "NIPVerificationStatusHeader",
+      "HeaderText": "WER. NIP Status"
+    },
+    {
+      "ID": "REGONVerificationStatusHeader",
+      "HeaderText": "WER. REGON Status"
+    },
+    {
+      "ID": "WhiteListVerificationStatusHeader",
+      "HeaderText": "WER. Biala Lista Status"
+    },
+    {
+      "ID": "AllAccountsHeader",
+      "HeaderText": "WER. Konta bankowe z Bialej Listy"
+    },
+    {
+      "ID": "FullNameColumnHeader",
+      "HeaderText": "WER. Nazwa pelna"
+    },
+    {
+      "ID": "DateColumnHeader",
+      "HeaderText": "WER. Data weryfikacji"
+    },
+    {
+      "ID": "StringConfIDHeader",
+      "HeaderText": "WER. Ciąg potwierdzenia weryfikacji"
+    },
+    {
+      "ID": "FullResidenceAddressHeader",
+      "HeaderText": "WER. Adres siedziby"
+    },
+    {
+      "ID": "FullWorkingAddressHeader",
+      "HeadrText": "WER. Adres wykonywania działalności"
+    },
+    {
+      "ID": "AccountSeparateColHeaderStarter",
+      "HeaderText": "WER. Konto"
+    }
+  ]
+}
