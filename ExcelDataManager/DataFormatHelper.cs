@@ -8,6 +8,11 @@ namespace ExcelDataManager.Lib
 {
     static class DataFormatHelper
     {
+        /// <summary>
+        /// Validate nip. Source wikipedia.
+        /// </summary>
+        /// <param name="nip"></param>
+        /// <returns></returns>
         public static bool IsNipValid(string nip)
         {
             nip = nip.Replace("-", string.Empty);
