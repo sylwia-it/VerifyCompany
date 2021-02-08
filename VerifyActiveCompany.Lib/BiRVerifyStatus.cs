@@ -51,6 +51,8 @@ namespace VerifyActiveCompany.Lib
                     return _erroneusOrEmptyReportName;
                 case BiRVerifyStatus.NoSearchYet:
                     return _noSearchYet;
+                case BiRVerifyStatus.CompanyIsNull:
+                    return _companyIsNull;
                 default:
                     return string.Empty;
                     
