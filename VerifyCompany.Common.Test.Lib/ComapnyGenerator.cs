@@ -12,13 +12,32 @@ namespace VerifyCompany.Common.Test.Lib
         private static readonly string _correctNIP3 = "7811767696";
         private static readonly string _correctNIP4 = "7781454968";
         private static readonly string _correctNIP5 = "7781424849";
+        private static readonly string _correctNIP6 = "5252678750";
+        private static readonly string _correctNIP7 = "7010363179";
+        private static readonly string _correctNIP8 = "5262493733";
+        private static readonly string _correctNIP9 = "6340128015";
+        private static readonly string _correctNIP10 = "5270103391";
+        private static readonly string _correctNIP11 = "6770044350";
+
+
+
+        public static readonly List<string> CorrectNIPs = new List<string>
+            {_correctNIP1, _correctNIP2, _correctNIP3, _correctNIP4, _correctNIP5, _correctNIP6, _correctNIP7, _correctNIP8, _correctNIP9,  _correctNIP10,  _correctNIP11, "9721305036", "2090001440", "7851732729", "7770000755", "7811642368", "7770003274", "7770005132", "7822622168", "7790021358", "5260002151", "7820021602", "7811781236", "7820069744", "7811846734", "7791002618", "7792433421", "7781118503", "5223071241", "7770000991", "5260021533", "7792446406", "5252289623", "7822131157", "777001479", "7810013469"};
+
         private static readonly string _correctPhisicalCompanyNIP1 = "9471862705";
+        
 
         private static readonly string _correctID1 = "c1";
         private static readonly string _correctID2 = "c2";
         private static readonly string _correctID3 = "c3";
         private static readonly string _correctID4 = "c4";
         private static readonly string _correctID5 = "c5";
+        private static readonly string _correctID6 = "c6";
+        private static readonly string _correctID7 = "c7";
+        private static readonly string _correctID8 = "c8";
+        private static readonly string _correctID9 = "c9";
+        private static readonly string _correctID10 = "c10";
+        private static readonly string _correctID11 = "c11";
         private static readonly string _correctPhisicalCompanyID1 = "phc1";
 
         private static readonly string _incorrectNIP1 = "1234";
@@ -32,6 +51,9 @@ namespace VerifyCompany.Common.Test.Lib
         private static readonly string _incorrectID3 = "ic3";
         private static readonly string _incorrectID4 = "ic4";
         private static readonly string _incorrectID5 = "ic5";
+
+        private static readonly string _zakUpadloscioweNIP1 = "5992973948";
+        private static readonly string _zakUpadloscioweNIPID1 = "u1";
 
         private static List<string> _correctNIPs;
         private static List<string> _incorrectNIPs;
@@ -63,6 +85,11 @@ namespace VerifyCompany.Common.Test.Lib
             return _correctNIPs[_random.Next(0, _correctNIPs.Count)];
         }
 
+        public static string GetZakonczoneUpadaloscioweNIP()
+        {
+            return _zakUpadloscioweNIP1;
+        }
+
         public static string GetCorrectNIP(int index)
         {
             if (!_isSetUp)
@@ -71,6 +98,15 @@ namespace VerifyCompany.Common.Test.Lib
             return _correctNIPs[index];
         }
 
+        public static List<string> GetCorrectNIPs()
+        {
+            if (!_isSetUp)
+            { SetUp(); }
+
+            return _correctNIPs.ToList<string>();
+        }
+
+
         public static string GetInCorrectNIP(int index)
         {
             if (!_isSetUp)
@@ -78,6 +114,8 @@ namespace VerifyCompany.Common.Test.Lib
 
             return _incorrectNIPs[index];
         }
+
+
 
         public static List<Company> GetAllCompanies()
         {
@@ -111,15 +149,21 @@ namespace VerifyCompany.Common.Test.Lib
         {
             _random = new Random((int)DateTime.Now.Ticks);
 
-            _correctNIPs = new List<string>() { _correctNIP1, _correctNIP2, _correctNIP3, _correctNIP4, _correctNIP5 };
+            _correctNIPs = new List<string>() { _correctNIP1, _correctNIP2, _correctNIP3, _correctNIP4, _correctNIP5, _correctNIP6, _correctNIP7, _correctNIP8, _correctNIP9, _correctNIP10, _correctNIP11};
             _incorrectNIPs = new List<string>() { _incorrectNIP1, _incorrectNIP2, _incorrectNIP3, _incorrectNIP4, _incorrectNIP5 };
 
             _correctCompanies = new List<Company>()
-            {   new Company(){ NIP = _correctNIP1, ID = _correctID1},
-                new Company(){ NIP = _correctNIP2,  ID = _correctID2},
-                new Company(){ NIP = _correctNIP3,  ID = _correctID3},
-                new Company(){ NIP = _correctNIP4, ID = _correctID4},
-                new Company(){ NIP = _correctNIP5, ID = _correctID5}
+            {   new Company(){ NIP = _correctNIP1, ID = _correctID1, BankAccountNumber = "03124061751111001095041381" }, 
+                new Company(){ NIP = _correctNIP2, ID = _correctID2, BankAccountNumber = "24114011240000582620001003" },
+                new Company(){ NIP = _correctNIP3, ID = _correctID3, BankAccountNumber = "68160010841844744520000009" },
+                new Company(){ NIP = _correctNIP4, ID = _correctID4, BankAccountNumber = "27116022020000000109081086" },
+                new Company(){ NIP = _correctNIP5, ID = _correctID5, BankAccountNumber = "11114011240000584072001027" },
+                new Company(){ NIP = _correctNIP6, ID = _correctID6, BankAccountNumber = "64114020040000300278432279" },
+                new Company(){ NIP = _correctNIP7, ID = _correctID7, BankAccountNumber = "17124060031111000049409738" },
+                new Company(){ NIP = _correctNIP8, ID = _correctID8, BankAccountNumber = "67160011270003012765973021" },
+                new Company(){ NIP = _correctNIP9, ID = _correctID9, BankAccountNumber = "51124013301111001028688812" },
+                new Company(){ NIP = _correctNIP10, ID = _correctID10, BankAccountNumber = "31103015080000000500217065" },
+                new Company(){ NIP = _correctNIP11, ID = _correctID11, BankAccountNumber = "77160010130002001222057198" }
             };
 
             _incorrectCompanies = new List<Company>()
@@ -138,6 +182,12 @@ namespace VerifyCompany.Common.Test.Lib
                 { _correctNIP3, _correctID3 },
                 { _correctNIP4, _correctID4 },
                 { _correctNIP5, _correctID5 },
+                { _correctNIP6, _correctID6 },
+                { _correctNIP7, _correctID7 },
+                { _correctNIP8, _correctID8 },
+                { _correctNIP9, _correctID9 },
+                { _correctNIP10, _correctID10 },
+                { _correctNIP11, _correctID11 },
 
                 { _incorrectNIP1, _incorrectID1 },
                 { _incorrectNIP2, _incorrectID2 },
@@ -153,7 +203,13 @@ namespace VerifyCompany.Common.Test.Lib
                 { _correctCompanies[2].ID, _correctCompanies[2] },
                 { _correctCompanies[3].ID, _correctCompanies[3] },
                 { _correctCompanies[4].ID, _correctCompanies[4] },
-               
+                { _correctCompanies[5].ID, _correctCompanies[5] },
+                { _correctCompanies[6].ID, _correctCompanies[6] },
+                { _correctCompanies[7].ID, _correctCompanies[7] },
+                { _correctCompanies[8].ID, _correctCompanies[8] },
+                { _correctCompanies[9].ID, _correctCompanies[9] },
+                { _correctCompanies[10].ID, _correctCompanies[10] },
+
 
             };
 
