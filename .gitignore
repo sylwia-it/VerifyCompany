@@ -16,3 +16,5 @@
 netcoreapp3.1
 obj
 packages
+/ExcelDataManager.Lib.Test/InputData
+/ExcelDataManager.Lib.Test/*.user
