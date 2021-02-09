@@ -4,10 +4,7 @@
     <TargetFrameworks>netcoreapp3.1;net472</TargetFrameworks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\VerifyCompany.Common.Lib\VerifyCompany.Common.Lib.csproj" />
-  </ItemGroup>
-
+ 
   <ItemGroup>
     <Reference Include="VerifyCompany.Common.Lib">
       <HintPath>..\VerifyCompany.Common.Lib\bin\$(Configuration)\netcoreapp3.1\VerifyCompany.Common.Lib.dll</HintPath>
