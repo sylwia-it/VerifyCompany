@@ -7,6 +7,6 @@ namespace VerifyWhiteListCompany.Lib
     {
         void Init(string url);
 
-        Task<EntityListResponse> VerifyCompanies(string nips);
+        Task<EntryListResponse> VerifyCompanies(string nips);
     }
 }

@@ -25,7 +25,9 @@ namespace VerifyWhiteListCompany.Lib
         private const string _comma = ",";
 
         private static string _activeVatPayerConst = "Czynny";
-        private string _activeVATPayerResponseMsg = "Pomiot jest CZYNNYM płatnikiem VAT.";
+        private const string _multipleEntriesError = "Serwis Białej Listy Firm zwrócił wiele podmiotów dla podanego NIPu";
+        private const string _activeVATPayerResponseMsg = "Pomiot jest CZYNNYM płatnikiem VAT.";
+        private const string _notInVATRegiestrCompany = "Serwis Białej Listy Firm nie zwrócił odpowiedzi dla tego podmiotu.";
         private const string _emptyVerResponseMsg = "Serwis Białej Listy Firm nie zwrócił odpowiedzi.";
         private const string _nipErrorVerResponseMsg = "NIP nie jest poprawny.";
         private const string _nipEmptyVerResponseMsg = "Podmiot nie był sprawdzony w serwisie Biała Lista Przedzsiębiorstw.NIE podano NIPu w pliku źródłowym";
@@ -55,7 +57,7 @@ namespace VerifyWhiteListCompany.Lib
         /// <param name="verifyBankAccount">If the bank account shall be verified if exists on the list of allowed/correct bank accounts</param>
         /// <returns><code>null</code> when there are no companies to verify</returns>
         /// <exception cref="ArgumentNullException">When input companies are null.</exception>
-        public Dictionary<string, WhiteListVerResult> VerifyCompanies(List<Company> inputCompaniesToVerify, List<Company> riskyInputCompanies, bool verifyBankAccount)
+        public Dictionary<string, WhiteListVerResult> VerifyCompanies(List<Company> inputCompaniesToVerify, bool verifyBankAccount)
         {
             if (inputCompaniesToVerify == null)
             {
@@ -72,14 +74,8 @@ namespace VerifyWhiteListCompany.Lib
             List<Company> companiesToVerify = inputCompaniesToVerify.Where(c => !string.IsNullOrEmpty(c.NIP)).ToList();
             List<Company> nipEmptyCompanies = inputCompaniesToVerify.Where(iC => string.IsNullOrEmpty(iC.NIP)).ToList();
 
-            if (riskyInputCompanies != null)
-            {
-                companiesToVerify = companiesToVerify.Where(iC => riskyInputCompanies.Count(rIC => rIC.ID == iC.ID) == 0).ToList();
-            }
-
-
             try
-            {   // Not risky companies
+            {  
                 for (int i = 0; i <= companiesToVerify.Count / _maxNumOfNipsPerOneRequest && i < _maxNumOfRequestsPerDay; i++)
                 {
                     var chunkOfCompaies = companiesToVerify.Skip(i * _maxNumOfNipsPerOneRequest).Take(_maxNumOfNipsPerOneRequest).ToList();
@@ -93,27 +89,7 @@ namespace VerifyWhiteListCompany.Lib
                     _numOfRequestsInTheAppRun++;
                 }
 
-                if (riskyInputCompanies != null)
-                {
-                    foreach (var riskyCompany in riskyInputCompanies)
-                    {
-                        if (!string.IsNullOrEmpty(riskyCompany.NIP))
-                        {
-                            var chunkOfCompaies = new List<Company>() { riskyCompany };
-                            string nipsInString = GetNIPsInOneString(riskyCompany);
-
-                            Dictionary<string, WhiteListVerResult> chunkVerification = VerifyChunkOfCompanies(chunkOfCompaies, nipsInString, verifyBankAccount);
-
-                            foreach (var verResult in chunkVerification)
-                            {
-                                result.Add(verResult.Key, verResult.Value);
-                                _numOfNipsAskedInTheAppRun++;
-                            }
-                            _numOfRequestsInTheAppRun++;
-                        }
-                    }
-                }
-
+               
                 if (nipEmptyCompanies != null)
                 {
                     foreach (var nipEmptyCompany in nipEmptyCompanies)
@@ -127,7 +103,7 @@ namespace VerifyWhiteListCompany.Lib
                         resultC.IsActiveVATPayer = false;
                         resultC.IsGivenAccountNumOnWhiteList = false;
                         resultC.Nip = string.Empty;
-                        resultC.VerificationDate = DateTime.Now;
+                        resultC.VerificationDate = DateTime.Now.ToString();
                         resultC.VerificationStatus = WhiteListVerResultStatus.ErrorNIPEmpty;
                         result.Add(nipEmptyCompany.ID, resultC);
                     }
@@ -142,117 +118,116 @@ namespace VerifyWhiteListCompany.Lib
 
         private  Dictionary<string, WhiteListVerResult> VerifyChunkOfCompanies(List<Company> chunkOfCompaies, string nipsInString, bool verifyBankAccount)
         {
-            EntityListResponse content = null;
+            EntryListResponse content = null;
             Dictionary<string, WhiteListVerResult> result = new Dictionary<string, WhiteListVerResult>();
             WhiteListVerResult tempWhiteListVerResult = null;
 
-            try
-            {
-                content = _whiteListClient.VerifyCompanies(nipsInString).GetAwaiter().GetResult();
-            }
-            catch (WhiteListClientException wSE)
-            {
-                content = new EntityListResponse();
-                content.Exception = wSE.GetException();
-            }
-
+            content = _whiteListClient.VerifyCompanies(nipsInString).GetAwaiter().GetResult();
+            
             foreach (var companyToVerify in chunkOfCompaies)
             {
                 tempWhiteListVerResult = new WhiteListVerResult()
                 {
                     Nip = companyToVerify.NIP,
                     GivenAccountNumber = companyToVerify.BankAccountNumber is null ? string.Empty : companyToVerify.BankAccountNumber,
-                    VerificationDate = DateTime.Now
+                    VerificationDate = DateTime.Now.ToString()
                 };
 
-                if (content == null || content.Exception != null)
+                if (content == null || content.Result == null || content.Result.Entries == null)
                 {
-                    AddInformationAboutError(ref tempWhiteListVerResult, content);
-                } 
+                    AddInformationAboutGeneralError(ref tempWhiteListVerResult, content);
+                }
                 else
                 {
                     tempWhiteListVerResult.ConfirmationResponseString = content.Result.RequestId;
+                    tempWhiteListVerResult.VerificationDate = content.Result.RequestDateTime;
 
-                    var verifiedCompanies = content.Result.Subjects;
+                    var verifiedCompanies = content.Result.Entries;
 
-                    if (verifiedCompanies.Any(c => c.Nip == companyToVerify.NIP))
+                    if (verifiedCompanies.Any(c => c.Identifier == companyToVerify.NIP))
                     {
-                        Entity verifiedCompany = verifiedCompanies.FirstOrDefault(c => c.Nip == companyToVerify.NIP);
-                        tempWhiteListVerResult.IsActiveVATPayer = verifiedCompany.StatusVat == _activeVatPayerConst;
-                        tempWhiteListVerResult.AccountNumbers = verifiedCompany.AccountNumbers;
-                        tempWhiteListVerResult.IsGivenAccountNumOnWhiteList = IsAccountNumberOnWhiteList(tempWhiteListVerResult.AccountNumbers, tempWhiteListVerResult.GivenAccountNumber);
-                        tempWhiteListVerResult.FullName = verifiedCompany.Name;
-                        tempWhiteListVerResult.FullResidenceAddress = verifiedCompany.ResidenceAddress;
-                        tempWhiteListVerResult.FullWorkingAddress = verifiedCompany.WorkingAddress;
-
-
-                        if (verifyBankAccount && tempWhiteListVerResult.IsActiveVATPayer)
+                        Entry verifiedCompanyEntry = verifiedCompanies.FirstOrDefault(c => c.Identifier == companyToVerify.NIP);
+                        if (verifiedCompanyEntry.Subjects == null || verifiedCompanyEntry.Error !=null || verifiedCompanyEntry.Subjects.Count != 1 )
                         {
-                            if (companyToVerify.BankAccountNumber is null)
-                            {
-                                tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull;
-                                tempWhiteListVerResult.SetVerStatusMessage(_activeButAccountNotGivenResponseMsg);
-
-                            }
-                            else if (tempWhiteListVerResult.AccountNumbers is null || tempWhiteListVerResult.AccountNumbers.Count == 0)
-                            {
-                                tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerButHasNoAccounts;
-                                tempWhiteListVerResult.SetVerStatusMessage(_activeButHasNoAccountsOnWhiteListResponseMsg);
-                            }
-                            else if (IsGivenAccountNumberGiven(tempWhiteListVerResult.GivenAccountNumber))
-                            {
-                                if (tempWhiteListVerResult.IsGivenAccountNumOnWhiteList)
-                                {
-                                    tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerAccountOKVerSuccessfull;
-                                    tempWhiteListVerResult.SetVerStatusMessage(_activeAndAccountOkResponseMsg);
-                                }
-                                else
-                                {
-                                    tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerButGivenAccountNotOnWhiteList;
-                                    tempWhiteListVerResult.SetVerStatusMessage(_activeButGivenAccountNotOnWhiteListResponseMsg);
-                                }
-                            }
-                            else if (string.IsNullOrEmpty(tempWhiteListVerResult.GivenAccountNumber))
-                            {
-                                
-                                tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull;
-                                tempWhiteListVerResult.SetVerStatusMessage(_activeButAccountNotGivenResponseMsg);
-                            }
-                            else
-                            {
-                                tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerButGivenAccountWrong;
-                                tempWhiteListVerResult.SetVerStatusMessage(_activeButGivenAccountHasWrongFormatResponsMsg);
-                            }
+                            AddInformationAboutError(ref tempWhiteListVerResult, verifiedCompanyEntry);
                         }
-                        else if (!verifyBankAccount && tempWhiteListVerResult.IsActiveVATPayer)
+                        else
                         {
-                            tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull;
-                            tempWhiteListVerResult.SetVerStatusMessage(_activeVATPayerResponseMsg);
+                            AddInformationAboutVerifiedCompany(ref tempWhiteListVerResult, companyToVerify, verifiedCompanyEntry.Subjects[0], verifyBankAccount);
                         }
-                        else 
-                        {
-                            tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.NotActiveVATPayer;
-                            tempWhiteListVerResult.SetVerStatusMessage(_notActiveVATPayerResponseMsg);
-
-                        }
-                    }
-                    else if (verifiedCompanies.Count == 0)
-                    {
-                        tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.NotInVATRegisterCompany;
-                        tempWhiteListVerResult.SetVerStatusMessage(_companyNotInVATRegisterResponseMsg);
                     }
                     else
                     {
-
-                        tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ErrorVerProcessFailed;
-                        tempWhiteListVerResult.SetVerStatusMessage(_verProcessFailedResponseMsg);
-                        
+                        tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.NotInVATRegisterCompany;
+                        tempWhiteListVerResult.SetVerStatusMessage(_notInVATRegiestrCompany);
                     }
                 }
                 result.Add(companyToVerify.ID, tempWhiteListVerResult);
             }
 
             return result;
+        }
+
+        private void AddInformationAboutVerifiedCompany(ref WhiteListVerResult tempWhiteListVerResult, Company companyToVerify, Entity verifiedCompany, bool verifyBankAccount)
+        {
+
+            tempWhiteListVerResult.IsActiveVATPayer = verifiedCompany.StatusVat == _activeVatPayerConst;
+            tempWhiteListVerResult.AccountNumbers = verifiedCompany.AccountNumbers;
+            tempWhiteListVerResult.IsGivenAccountNumOnWhiteList = IsAccountNumberOnWhiteList(tempWhiteListVerResult.AccountNumbers, tempWhiteListVerResult.GivenAccountNumber);
+            tempWhiteListVerResult.FullName = verifiedCompany.Name;
+            tempWhiteListVerResult.FullResidenceAddress = verifiedCompany.ResidenceAddress;
+            tempWhiteListVerResult.FullWorkingAddress = verifiedCompany.WorkingAddress;
+
+
+            if (verifyBankAccount && tempWhiteListVerResult.IsActiveVATPayer)
+            {
+                if (companyToVerify.BankAccountNumber is null)
+                {
+                    tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull;
+                    tempWhiteListVerResult.SetVerStatusMessage(_activeButAccountNotGivenResponseMsg);
+
+                }
+                else if (tempWhiteListVerResult.AccountNumbers is null || tempWhiteListVerResult.AccountNumbers.Count == 0)
+                {
+                    tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerButHasNoAccounts;
+                    tempWhiteListVerResult.SetVerStatusMessage(_activeButHasNoAccountsOnWhiteListResponseMsg);
+                }
+                else if (IsGivenAccountNumberGiven(tempWhiteListVerResult.GivenAccountNumber))
+                {
+                    if (tempWhiteListVerResult.IsGivenAccountNumOnWhiteList)
+                    {
+                        tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerAccountOKVerSuccessfull;
+                        tempWhiteListVerResult.SetVerStatusMessage(_activeAndAccountOkResponseMsg);
+                    }
+                    else
+                    {
+                        tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerButGivenAccountNotOnWhiteList;
+                        tempWhiteListVerResult.SetVerStatusMessage(_activeButGivenAccountNotOnWhiteListResponseMsg);
+                    }
+                }
+                else if (string.IsNullOrEmpty(tempWhiteListVerResult.GivenAccountNumber))
+                {
+
+                    tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull;
+                    tempWhiteListVerResult.SetVerStatusMessage(_activeButAccountNotGivenResponseMsg);
+                }
+                else
+                {
+                    tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerButGivenAccountWrong;
+                    tempWhiteListVerResult.SetVerStatusMessage(_activeButGivenAccountHasWrongFormatResponsMsg);
+                }
+            }
+            else if (!verifyBankAccount && tempWhiteListVerResult.IsActiveVATPayer)
+            {
+                tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull;
+                tempWhiteListVerResult.SetVerStatusMessage(_activeVATPayerResponseMsg);
+            }
+            else
+            {
+                tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.NotActiveVATPayer;
+                tempWhiteListVerResult.SetVerStatusMessage(_notActiveVATPayerResponseMsg);
+
+            }
         }
 
         private bool IsAccountNumberOnWhiteList(List<string> accountNumbers, string givenAccountNumber)
@@ -295,40 +270,54 @@ namespace VerifyWhiteListCompany.Lib
         }
 
         private readonly List<string> _errorCodes = new List<string>() { "WL-112", "WL-113", "WL-114", "WL-115" };
-        private void AddInformationAboutError(ref WhiteListVerResult tempWhiteListVerResult, EntityListResponse content)
+        private void AddInformationAboutGeneralError(ref WhiteListVerResult tempWhiteListVerResult, EntryListResponse content)
         {
-            if (content == null)
+            
+
+            if (content == null || content.Result == null)
             {
                 tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ErrorEmptyResponse;
                 tempWhiteListVerResult.SetVerStatusMessage(_emptyVerResponseMsg);
                 tempWhiteListVerResult.ConfirmationResponseString = string.Empty;
             }
-            else if (content.Exception != null)
+            else if (content.Result.Entries == null)
             {
-                if (_errorCodes.Contains(content.Exception.Code))
-                {
-                    if (content.Exception.Message.Contains(tempWhiteListVerResult.Nip))
-                    {
-                        tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ErrorNIPError;
-                        tempWhiteListVerResult.SetVerStatusMessage(string.Format(_ownNipEmptyVerResponseMsgFormat, content.Exception.Code, content.Exception.Message));
-                        tempWhiteListVerResult.ConfirmationResponseString = string.Empty;
+                tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ErrorEmptyResponse;
+                tempWhiteListVerResult.ConfirmationResponseString = content.Result.RequestId;
+                tempWhiteListVerResult.VerificationDate = content.Result.RequestDateTime;
+            }
+        }
 
-                    }
-                    else
-                    {
-                        string errNip = _nipPattern.Match(content.Exception.Message).Value;
-                        tempWhiteListVerResult.SetVerStatusMessage(string.Format("NIP nie był sprawdzony. Popraw błąd w innym NIPie: {2} i ponów wyszukiwanie. Kod błędu: {0} Wiadomość: {1}", content.Exception.Code, content.Exception.Message, errNip));
-                        tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ErrorOtherNIPError;
+        private void AddInformationAboutError(ref WhiteListVerResult tempWhiteListVerResult, Entry verifiedCompanyEntry)
+        {
+            //if (verifiedCompany.Subjects == null || verifiedCompany.Error != null || verifiedCompany.Subjects.Count != 1)
+            if (verifiedCompanyEntry.Error != null)
+            {
+                if (_errorCodes.Contains(verifiedCompanyEntry.Error.Code))
+                {
+                  
+                        tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ErrorNIPError;
+                        tempWhiteListVerResult.SetVerStatusMessage(string.Format(_ownNipEmptyVerResponseMsgFormat, verifiedCompanyEntry.Error.Code, verifiedCompanyEntry.Error.Message));
                         tempWhiteListVerResult.ConfirmationResponseString = string.Empty;
-                    }
 
                 }
                 else
                 {
-                    tempWhiteListVerResult.SetVerStatusMessage(string.Format("Kod błędu: {0} Wiadomość: {1}", content.Exception.Code, content.Exception.Message));
+                    tempWhiteListVerResult.SetVerStatusMessage(string.Format("Kod błędu: {0} Wiadomość: {1}", verifiedCompanyEntry.Error.Code, verifiedCompanyEntry.Error.Message));
                     tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.Error;
                     tempWhiteListVerResult.ConfirmationResponseString = string.Empty;
                 }
+            }
+            else if (verifiedCompanyEntry.Subjects == null)
+            {
+                tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.NotInVATRegisterCompany;
+                tempWhiteListVerResult.SetVerStatusMessage(_notInVATRegiestrCompany);
+
+            }
+            else if (verifiedCompanyEntry.Subjects.Count != 1)
+            {
+                tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.MultipleEntriesError;
+                tempWhiteListVerResult.SetVerStatusMessage(_multipleEntriesError);
             }
         }
     }

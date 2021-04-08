@@ -33,10 +33,10 @@ namespace VerifyWhiteListCompany.Lib
         /// </summary>
         /// <param name="nips">Comma separted Nips</param>
         /// <returns></returns>
-        public async Task<EntityListResponse> VerifyCompanies(string nips)
+        public async Task<EntryListResponse> VerifyCompanies(string nips)
         {
             string currentDate = DateTime.Now.ToString(_dateFormat);
-            EntityListResponse entities = null;
+            EntryListResponse entities = null;
             string content;
             string getCompaniesByNipUrl = string.Format("{0}/{1}?date={2}", _getCompaniesByNipMethodUrl, nips, currentDate);
 
@@ -44,7 +44,7 @@ namespace VerifyWhiteListCompany.Lib
             if (responseMsg.IsSuccessStatusCode)
             {
                 content = await responseMsg.Content.ReadAsStringAsync();
-                entities = JsonConvert.DeserializeObject<EntityListResponse>(content);
+                entities = JsonConvert.DeserializeObject<EntryListResponse>(content);
 
             }
             else

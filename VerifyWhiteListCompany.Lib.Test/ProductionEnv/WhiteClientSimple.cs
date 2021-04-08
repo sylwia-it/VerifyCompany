@@ -2,6 +2,8 @@ using NUnit.Framework;
 using VerifyWhiteListCompany.Lib.WebServiceModel;
 using System.Linq;
 using System.Collections.Generic;
+using VerifyWhiteListCompany.Lib.Test.Helpers;
+using System;
 
 namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
 {
@@ -25,11 +27,13 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
             string nipToCheck = VerifyCompany.Common.Test.Lib.CompanyGenerator.GetCorrectNIP();
             var a = _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult();
             Assert.IsNotNull(a.Result.RequestId);
-            Assert.IsNotNull(a.Result.Subjects);
+            Assert.IsNotNull(a.Result.RequestDateTime);
+            Assert.IsNotNull(a.Result.Entries);
 
-            Entity result = a.Result.Subjects.FirstOrDefault();
-            Assert.AreEqual(nipToCheck, result.Nip);
-            Assert.AreEqual("Czynny", result.StatusVat);
+            Entry result = a.Result.Entries.FirstOrDefault();
+            Assert.AreEqual(nipToCheck, result.Identifier);
+            Assert.AreEqual(nipToCheck, result.Subjects[0].Nip);
+            Assert.AreEqual("Czynny", result.Subjects[0].StatusVat);
         }
 
         [Test]
@@ -39,11 +43,14 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
             var a = _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult();
             Assert.IsNotNull(a.Result.RequestId);
             Assert.IsNotEmpty(a.Result.RequestId);
-            Assert.IsNotNull(a.Result.Subjects);
+            Assert.IsNotNull(a.Result.RequestDateTime);
+            Assert.IsNotEmpty(a.Result.RequestDateTime);
+            Assert.IsNotNull(a.Result.Entries);
 
-            Entity result = a.Result.Subjects.FirstOrDefault();
-            Assert.AreEqual(nipToCheck, result.Nip);
-            Assert.AreNotEqual("Czynny", result.StatusVat);
+            Entry result = a.Result.Entries.FirstOrDefault();
+            Assert.AreEqual(nipToCheck, result.Identifier);
+            Assert.AreEqual(nipToCheck, result.Subjects[0].Nip);
+            Assert.AreNotEqual("Czynny", result.Subjects[0].StatusVat);
       
         }
 
@@ -55,11 +62,13 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
             var a = _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult();
             Assert.IsNotNull(a.Result.RequestId);
             Assert.IsNotEmpty(a.Result.RequestId);
-            Assert.IsNotNull(a.Result.Subjects);
+            Assert.IsNotNull(a.Result.RequestDateTime);
+            Assert.IsNotEmpty(a.Result.RequestDateTime);
+            Assert.IsNotNull(a.Result.Entries);
 
-            Entity result = a.Result.Subjects.FirstOrDefault();
-            Assert.AreEqual(0, a.Result.Subjects.Count);
-            Assert.IsNull(result);
+            Entry result = a.Result.Entries.FirstOrDefault();
+            Assert.AreEqual(0, result.Subjects.Count);
+            //Assert.IsNull(result);
 
         }
 
@@ -68,11 +77,13 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         {
             string nipToCheck = string.Empty;
 
-            var e = Assert.Throws<WhiteListClientException>(() => _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult());
-            var innerException = e.GetException();
-            var code = innerException.Code;
-            Assert.AreEqual("WL-112", code);
+            EntryListResponse eLR = _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult();
+            Assert.IsTrue(DTHelper.IsItToday(eLR.Result.RequestDateTime));
+            Assert.IsNotNull(eLR.Result.RequestId);
+            Assert.IsNotEmpty(eLR.Result.RequestId);
 
+            Assert.AreEqual(nipToCheck, eLR.Result.Entries[0].Identifier);
+            Assert.AreEqual("WL-112", eLR.Result.Entries[0].Error.Code);
         }
 
         [Test]
@@ -80,10 +91,13 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         {
             string nipToCheck = "123";
 
-            var e = Assert.Throws<WhiteListClientException>(() => _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult());
-            var innerException = e.GetException();
-            var code = innerException.Code;
-            Assert.AreEqual("WL-113", code);
+            EntryListResponse eLR = _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult();
+            Assert.IsTrue(DTHelper.IsItToday(eLR.Result.RequestDateTime));
+            Assert.IsNotNull(eLR.Result.RequestId);
+            Assert.IsNotEmpty(eLR.Result.RequestId);
+
+            Assert.AreEqual(nipToCheck, eLR.Result.Entries[0].Identifier);
+            Assert.AreEqual("WL-113", eLR.Result.Entries[0].Error.Code);
 
         }
 
@@ -93,10 +107,13 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         {
             string nipToCheck = "123456789190";
 
-            var e = Assert.Throws<WhiteListClientException>(() => _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult());
-            var innerException = e.GetException();
-            var code = innerException.Code;
-            Assert.AreEqual("WL-113", code);
+            EntryListResponse eLR = _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult();
+            Assert.IsTrue(DTHelper.IsItToday(eLR.Result.RequestDateTime));
+            Assert.IsNotNull(eLR.Result.RequestId);
+            Assert.IsNotEmpty(eLR.Result.RequestId);
+
+            Assert.AreEqual(nipToCheck, eLR.Result.Entries[0].Identifier);
+            Assert.AreEqual("WL-113", eLR.Result.Entries[0].Error.Code);
 
         }
 
@@ -107,10 +124,13 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
 
             foreach (var nipToCheck in nipsToCheck)
             {
-                var e = Assert.Throws<WhiteListClientException>(() => _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult());
-                var innerException = e.GetException();
-                var code = innerException.Code;
-                Assert.AreEqual("WL-114", code);
+                EntryListResponse eLR = _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult();
+                Assert.IsTrue(DTHelper.IsItToday(eLR.Result.RequestDateTime));
+                Assert.IsNotNull(eLR.Result.RequestId);
+                Assert.IsNotEmpty(eLR.Result.RequestId);
+
+                Assert.AreEqual(nipToCheck, eLR.Result.Entries[0].Identifier);
+                Assert.AreEqual("WL-114", eLR.Result.Entries[0].Error.Code);
             }
 
         }
@@ -121,14 +141,18 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         [Test]
         public void TestSingleWithIncorrectCharsButEliminatedByApiNipCompany()
         {
-            List<string> nipsToCheck = new List<string>() { "1,34567890", "1%3456789", "1_3456789", "1~3456789" };
+            List<string> nipsToCheck = new List<string>() { "1.34567890", "1+3456789", "1_3456789", "1~3456789" };
 
             foreach (var nipToCheck in nipsToCheck)
             {
-                var e = Assert.Throws<WhiteListClientException>(() => _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult());
-                var innerException = e.GetException();
-                var code = innerException.Code;
-                Assert.AreEqual("WL-113", code);
+                EntryListResponse eLR = _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult();
+                Assert.IsTrue(DTHelper.IsItToday(eLR.Result.RequestDateTime));
+                Assert.IsNotNull(eLR.Result.RequestId);
+                Assert.IsNotEmpty(eLR.Result.RequestId);
+
+                Assert.AreEqual(nipToCheck, eLR.Result.Entries[0].Identifier);
+                Assert.IsTrue(eLR.Result.Entries[0].Error.Code.Equals("WL-113") || eLR.Result.Entries[0].Error.Code.Equals("WL-114"));
+                Console.WriteLine(eLR.Result.Entries[0].Error.Code);
             }
 
         }

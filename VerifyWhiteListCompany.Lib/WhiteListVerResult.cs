@@ -17,7 +17,7 @@ namespace VerifyWhiteListCompany.Lib
         /// <summary>
         /// Date when the verification was run
         /// </summary>
-        public DateTime VerificationDate { get; internal set; }
+        public string VerificationDate { get; internal set; }
 
         /// <summary>
         /// Correct account numbers

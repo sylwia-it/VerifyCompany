@@ -22,6 +22,7 @@ namespace VerifyWhiteListCompany.Lib
         NotActiveVATPayer,
         NotInVATRegisterCompany,
         ErrorOtherNIPError,
+        MultipleEntriesError,
     }
 
   

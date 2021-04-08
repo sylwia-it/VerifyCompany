@@ -40,7 +40,7 @@ namespace VerifyWhiteListCompany.Lib.Test
             throw new NotImplementedException();
         }
 
-        public Task<EntityListResponse> VerifyCompanies(string nips)
+        public Task<EntryListResponse> VerifyCompanies(string nips)
         {
             throw new NotImplementedException();
         }

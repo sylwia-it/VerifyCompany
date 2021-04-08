@@ -44,21 +44,22 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
             {
                 var b = _client.VerifyCompanies(nipsInString[i]).GetAwaiter().GetResult();
                 Assert.IsNotNull(b.Result.RequestId);
-                Assert.IsNotNull(b.Result.Subjects);
+                Assert.IsNotNull(b.Result.RequestDateTime);
+                Assert.IsNotNull(b.Result.Entries);
                 //Assert.AreEqual(30, b.Result.Subjects.Count);
             }
 
-            EntityListResponse c = _client.VerifyCompanies(nipsInString[10]).GetAwaiter().GetResult();
-            c = _client.VerifyCompanies(nipsInString[9]).GetAwaiter().GetResult();
-            c = _client.VerifyCompanies(nipsInString[8]).GetAwaiter().GetResult();
-            c = _client.VerifyCompanies(nipsInString[7]).GetAwaiter().GetResult();
-            c = _client.VerifyCompanies(nipsInString[6]).GetAwaiter().GetResult();
-            c = _client.VerifyCompanies(nipsInString[5]).GetAwaiter().GetResult();
-            c = _client.VerifyCompanies(nipsInString[4]).GetAwaiter().GetResult();
-            c = _client.VerifyCompanies(nipsInString[3]).GetAwaiter().GetResult();
-            c = _client.VerifyCompanies(nipsInString[2]).GetAwaiter().GetResult();
-            c = _client.VerifyCompanies(nipsInString[1]).GetAwaiter().GetResult();
-            c = _client.VerifyCompanies(nipsInString[0]).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[10]).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[9]).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[8]).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[7]).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[6]).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[5]).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[4]).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[3]).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[2]).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[1]).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[0]).GetAwaiter().GetResult();
         }
 
         /// <summary>
