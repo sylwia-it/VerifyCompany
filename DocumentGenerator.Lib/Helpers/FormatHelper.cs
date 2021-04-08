@@ -19,6 +19,8 @@ namespace DocumentGenerator.Lib.Helpers
             return string.Empty;
         }
 
+
+
         private const string _spzooLong = "SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ";
         private const string _spzooShort = "SP. Z O. O.";
         private const string _spjLong = "SPÓŁKA JAWNA";

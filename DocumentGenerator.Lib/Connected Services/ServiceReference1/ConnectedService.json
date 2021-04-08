@@ -1,0 +1,28 @@
+﻿{
+  "ProviderId": "Microsoft.VisualStudio.ConnectedService.Wcf",
+  "Version": "15.0.31022.994",
+  "GettingStartedDocument": {
+    "Uri": "https://go.microsoft.com/fwlink/?linkid=858517"
+  },
+  "ExtendedData": {
+    "inputs": [
+      "https://uslugaterytws1test.stat.gov.pl/wsdl/terytws1.wsdl"
+    ],
+    "collectionTypes": [
+      "System.Array",
+      "System.Collections.Generic.Dictionary`2"
+    ],
+    "namespaceMappings": [
+      "*, ServiceReference1"
+    ],
+    "references": [
+      "D:\\MRepos\\VerifyCompany\\DocumentGenerator.Lib\\bin\\Debug\\netcoreapp3.1\\Interop.Microsoft.Office.Interop.Excel.dll",
+      "D:\\MRepos\\VerifyCompany\\DocumentGenerator.Lib\\bin\\Debug\\netcoreapp3.1\\VerifyCompany.Common.Lib.dll",
+      "D:\\MRepos\\VerifyCompany\\DocumentGenerator.Lib\\bin\\Debug\\netcoreapp3.1\\VerifyWhiteListCompany.Lib.dll",
+      "Newtonsoft.Json, {Newtonsoft.Json, 12.0.3}"
+    ],
+    "sync": true,
+    "targetFramework": "netcoreapp3.1",
+    "typeReuseMode": "All"
+  }
+}
