@@ -18,3 +18,8 @@ obj
 packages
 /ExcelDataManager.Lib.Test/InputData
 /ExcelDataManager.Lib.Test/*.user
+/DocumentGenerator.Lib/Templates/*.xltx
+/ExcelDataManager.Lib/obj
+/ExcelDataManager.Lib/bin
+/ExcelDataManager.Lib.Test/obj
+/ExcelDataManager.Lib.Test/bin
