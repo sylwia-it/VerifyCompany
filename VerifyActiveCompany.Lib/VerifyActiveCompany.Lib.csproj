@@ -51,7 +51,7 @@
     <Reference Include="System.Xml" />
     <Reference Include="VerifyCompany.Common.Lib">
       <HintPath>..\VerifyCompany.Common.Lib\bin\$(Configuration)\net472\VerifyCompany.Common.Lib.dll</HintPath>
-    </Reference> 
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BiRClientFactory.cs" />
@@ -59,6 +59,7 @@
     <Compile Include="BiRCompany.cs" />
     <Compile Include="BiRCompanyType.cs" />
     <Compile Include="BiRVerifier.cs" />
+    <Compile Include="BiRVerifyResult.cs" />
     <Compile Include="BiRVerifyStatus.cs" />
     <Compile Include="Client\BiRClient.cs" />
     <Compile Include="Connected Services\Service\Reference.cs">

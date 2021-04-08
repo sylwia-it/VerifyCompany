@@ -13,7 +13,7 @@ namespace VerifyActiveCompany.Lib.Test.TestEnv
         [Test]
         public void SetTestClientTest()
         {
-            IBiRClient clientSet = new BiRClient(TestBiRClientHelper.Url, TestBiRClientHelper.Url);
+            IBiRClient clientSet = new BiRClient(TestBiRClientHelper.Url, TestBiRClientHelper.SIDLogin);
        
             BiRClientFactory.SetClient(clientSet);
             IBiRClient clientGet = BiRClientFactory.GetClient();

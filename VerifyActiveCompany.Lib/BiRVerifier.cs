@@ -17,23 +17,56 @@ namespace VerifyActiveCompany.Lib
             _client = BiRClientFactory.GetClient();
         }
 
-        private BiRVerifyStatus IsCompanyActive(string nip)
+        private BiRVerifyResult IsCompanyActive(string nip)
         {
             if (string.IsNullOrEmpty(nip))
             {
-                return BiRVerifyStatus.NipIncorrect;
+                return new BiRVerifyResult(BiRVerifyStatus.NipIncorrect);
             }
 
             string nipPure = nip.Replace(_dash, string.Empty).Replace(_space, string.Empty).Trim();
             BiRCompany biRCompany = _client.GetCompany(nipPure);
             
             if (biRCompany == null)
-                return _client.GetLastErrorStatus();
+                return new BiRVerifyResult(_client.GetLastErrorStatus());
 
             if (IsActive(biRCompany) ?? true)
-                return BiRVerifyStatus.IsActive;
+            {
+                return new BiRVerifyResult(BiRVerifyStatus.IsActive);
+            }
             else
-                return BiRVerifyStatus.IsNotActive;
+            {
+                BiRVerifyResult result = new BiRVerifyResult(BiRVerifyStatus.IsNotActive);
+                result.Message = GetMessageWithDetailedData(result, biRCompany);
+                return result;
+            }
+        }
+
+        private string GetMessageWithDetailedData(BiRVerifyResult result, BiRCompany biRCompany)
+        {
+            string fullMessage = result.Message;
+            if (biRCompany.ZawieszeniaDate == DateTime.MinValue)
+            {
+                fullMessage = string.Concat(fullMessage, $" Data zawieszenia działaności: {biRCompany.ZawieszeniaDate}.");
+            }
+            if (biRCompany.ZakonczeniaDzialalnosciDate == DateTime.MinValue)
+            {
+                fullMessage = string.Concat(fullMessage, $" Data zakończenia: {biRCompany.ZakonczeniaDzialalnosciDate}.");
+            }
+            if (biRCompany.SkresleniaRegonDate == DateTime.MinValue)
+            {
+                fullMessage = string.Concat(fullMessage, $" Data skreślenia z Regon: {biRCompany.SkresleniaRegonDate}.");
+            }
+            if (biRCompany.OrzeczenieOUpadlosciDate == DateTime.MinValue)
+            {
+                fullMessage = string.Concat(fullMessage, $" Data orzeczenia o upadłości: {biRCompany.OrzeczenieOUpadlosciDate}.");
+            }
+            if (biRCompany.ZakonczeniePostepowaniaUpadlosiowegoDate == DateTime.MinValue)
+            {
+                fullMessage = string.Concat(fullMessage, $" Data zakończenia postępowania upadłoćiowego: {biRCompany.ZakonczeniePostepowaniaUpadlosiowegoDate}.");
+            }
+
+            return fullMessage;
         }
 
         private bool? IsActive(BiRCompany biRCompany)
@@ -63,23 +96,23 @@ namespace VerifyActiveCompany.Lib
             }
         }
 
-        public Dictionary<string, BiRVerifyStatus> AreCompaniesActive(Dictionary<string, Company> inputCompanies)
+        public Dictionary<string, BiRVerifyResult> AreCompaniesActive(Dictionary<string, Company> inputCompanies)
         {
             if (inputCompanies == null || inputCompanies.Count == 0)
                 return null;
 
-            Dictionary<string, BiRVerifyStatus> result = new Dictionary<string, BiRVerifyStatus>();
+            Dictionary<string, BiRVerifyResult> result = new Dictionary<string, BiRVerifyResult>();
 
             foreach (var company in inputCompanies)
             {
                 if (company.Value != null)
                 {
-                    BiRVerifyStatus verResult = IsCompanyActive(company.Value.NIP);
+                    BiRVerifyResult verResult = IsCompanyActive(company.Value.NIP);
                     result.Add(company.Key, verResult);
                 }
                 else
                 {
-                    result.Add(company.Key, BiRVerifyStatus.CompanyIsNull);
+                    result.Add(company.Key, new BiRVerifyResult(BiRVerifyStatus.CompanyIsNull));
                 }
             }
             
