@@ -55,8 +55,6 @@ jobs:
       
     - name: Restore the application
       run: msbuild ExcelDataManager.Lib /t:Restore
-      
-   
     
     - name: Test
       run: dotnet test --no-restore --filter "(FullyQualifiedName!~Production)"
