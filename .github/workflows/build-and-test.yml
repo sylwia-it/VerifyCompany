@@ -23,6 +23,10 @@ jobs:
       run: dotnet restore
     - name: Setup MSBuild Path
       uses: microsoft/setup-msbuild@v1.0.2
+    
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@2008f912f56e61277eefaac6d1888b750582aa16
+      
     - name: Setup NuGet
       uses: nuget/setup-nuget@v1
       with:
@@ -50,6 +54,9 @@ jobs:
       run: dotnet build VerifyActiveCompany.Lib --configuration Release --no-restore
     - name: Build VerifyActiveCompany.Lib.Test
       run: dotnet build VerifyActiveCompany.Lib.Test --configuration Release --no-restore
+      
+    - name: Restore the application
+      run: msbuild ExcelDataManager.Lib /t:Restore
       
     - name: Build ExcelDataManager.Lib
       run: dotnet build ExcelDataManager.Lib --configuration Release --no-restore
