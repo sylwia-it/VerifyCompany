@@ -56,15 +56,7 @@ jobs:
     - name: Restore the application
       run: msbuild ExcelDataManager.Lib /t:Restore
       
-    - name: Build ExcelDataManager.Lib
-      run: dotnet build ExcelDataManager.Lib --configuration Release --no-restore
-    - name: Build ExcelDataManager.Lib.Test
-      run: dotnet build ExcelDataManager.Lib.Test --configuration Release --no-restore
-
-    - name: Build DocumentGenerator.Lib
-      run: dotnet build DocumentGenerator.Lib --configuration Release --no-restore
-    - name: Build DocumentGenerator.Lib.Test
-      run: dotnet build DocumentGenerator.Lib.Test --configuration Release --no-restore    
+   
     
     - name: Test
       run: dotnet test --no-restore --filter "(FullyQualifiedName!~Production)"
