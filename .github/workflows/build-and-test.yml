@@ -54,7 +54,7 @@ jobs:
       run: dotnet build VerifyActiveCompany.Lib.Test --configuration Release --no-restore
       
     - name: Restore the application
-      run: msbuild ExcelDataManager.Lib /t:Restore
+      run: msbuild ExcelDataManager.Lib -restore
     
     - name: Test
       run: dotnet test --no-restore --filter "(FullyQualifiedName!~Production)"
