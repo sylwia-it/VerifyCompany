@@ -53,17 +53,17 @@ jobs:
     - name: Build VerifyActiveCompany.Lib.Test
       run: dotnet build VerifyActiveCompany.Lib.Test --configuration Release --no-restore
       
-    - name: RestoreExcelDataManager.Lib
-      run: msbuild ExcelDataManager.Lib -restore
-      
-    - name: Restore ExcelDataManager.Lib.Test
-      run: msbuild ExcelDataManager.Lib.Test -restore
-      
-    - name: Restore DocumentGenerator.Lib
-      run: msbuild DocumentGenerator.Lib -restore
-      
-    - name: Restore DocumentGenerator.Lib.Test
-      run: msbuild DocumentGenerator.Lib.Test -restore
+#    - name: RestoreExcelDataManager.Lib
+#      run: msbuild ExcelDataManager.Lib -restore
+#      
+#    - name: Restore ExcelDataManager.Lib.Test
+#      run: msbuild ExcelDataManager.Lib.Test -restore
+#      
+#    - name: Restore DocumentGenerator.Lib
+#      run: msbuild DocumentGenerator.Lib -restore
+#      
+#    - name: Restore DocumentGenerator.Lib.Test
+#      run: msbuild DocumentGenerator.Lib.Test -restore
     
    
  #- name: Test
