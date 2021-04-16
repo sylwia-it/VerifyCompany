@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ExcelDataManager\ExcelDataManager.Lib.csproj" />
+    <ProjectReference Include="..\ExcelDataManager.Lib\ExcelDataManager.Lib.csproj" />
     <ProjectReference Include="..\VerifyCompany.Common.Lib\VerifyCompany.Common.Lib.csproj" />
   </ItemGroup>
 

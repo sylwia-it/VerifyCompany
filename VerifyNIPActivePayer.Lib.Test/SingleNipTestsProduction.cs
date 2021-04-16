@@ -39,7 +39,7 @@ namespace VerifyNIPAvtivePayer.Lib.Test
         public void IncorrectNipVerification()
         {
             VerifyNIPResult response = verifier.VerifyNIP(CompanyGenerator.GetInCorrectNIP(1));
-            Assert.AreEqual(VerifyNIPResult.NIPNotCorrect, response);
+            Assert.AreEqual(VerifyNIPResult.NotRegisteredVATPayer, response);
         }
 
       
