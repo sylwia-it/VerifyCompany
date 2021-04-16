@@ -118,7 +118,9 @@ namespace DocumentGenerator.Lib
 
             string addressFull = string.IsNullOrEmpty(whiteListVerResult.FullResidenceAddress) ?
                     whiteListVerResult.FullWorkingAddress : whiteListVerResult.FullResidenceAddress;
+            addressFull = string.Concat(AddressHelper.GetStreetPrefix(addressFull), addressFull);
             addressFull = addressFull.Replace(_colon, string.Empty);
+            
 
             int addressDivIndex = _postalCodePattern.Match(addressFull).Index;
             ((Range)worksheet.Cells[8 + numOfLinesForFullNames, 8]).Formula = addressFull.Substring(0, addressDivIndex).Trim();
@@ -138,6 +140,8 @@ namespace DocumentGenerator.Lib
             ((Range)worksheet.Cells[36, 3]).Formula = NumberToWordsConverter.ConvertNumberToAmountPln((nettoAmount + vatAmout).ToString());
         }
 
+        
+        
 
         private const string q1Format = "01-01-{0} - 31-03-{0}";
         private const string q2Format = "01-04-{0} - 30-06-{0}";
