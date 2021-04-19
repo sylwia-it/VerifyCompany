@@ -24,3 +24,5 @@ packages
 /ExcelDataManager.Lib.Test/obj
 /ExcelDataManager.Lib.Test/bin
 /DocumentGenerator.Lib/input/spispna.csv
+/VerifyCompany.UI/obj
+/VerifyCompany.UI/bin

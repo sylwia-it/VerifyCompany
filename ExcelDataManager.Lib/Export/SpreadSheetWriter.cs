@@ -18,7 +18,7 @@ namespace ExcelDataManager.Lib.Export
     {
         private string _exportFilePath;
         private List<ColumnConfig> _columnsConfig;
-        private string _prefixOfHeaders;
+        private readonly string _prefixOfHeaders;
         private List<string> _sheetNamesToExclude; //name of sheet that shall be considered as source
         Dictionary<string, OverallResult> _overallVerificationResult = new Dictionary<string, OverallResult>();
 

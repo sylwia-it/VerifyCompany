@@ -63,6 +63,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentGenerator.Lib", "Do
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentGenerator.Lib.Test", "DocumentGenerator.Lib.Test\DocumentGenerator.Lib.Test.csproj", "{F7EA36A8-19B8-41A7-8373-C72351754DE8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VerifyCompany.UI", "VerifyCompany.UI\VerifyCompany.UI.csproj", "{8A350B00-0743-4976-9DAE-42E8F5451E2C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -117,6 +119,10 @@ Global
 		{F7EA36A8-19B8-41A7-8373-C72351754DE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7EA36A8-19B8-41A7-8373-C72351754DE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7EA36A8-19B8-41A7-8373-C72351754DE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A350B00-0743-4976-9DAE-42E8F5451E2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A350B00-0743-4976-9DAE-42E8F5451E2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A350B00-0743-4976-9DAE-42E8F5451E2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A350B00-0743-4976-9DAE-42E8F5451E2C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
