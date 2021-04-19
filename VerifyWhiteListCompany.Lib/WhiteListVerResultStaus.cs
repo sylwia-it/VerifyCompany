@@ -14,6 +14,7 @@ namespace VerifyWhiteListCompany.Lib
 
         ActiveVATPayerAccountOKVerSuccessfull,
         ActiveVATPayerVerSuccessfull,
+        ActiveVATPayerVerScuccessButGivenAccountNotVerified,
 
         ActiveVATPayerButHasNoAccounts,
         ActiveVATPayerButGivenAccountNotOnWhiteList,
@@ -23,6 +24,7 @@ namespace VerifyWhiteListCompany.Lib
         NotInVATRegisterCompany,
         ErrorOtherNIPError,
         MultipleEntriesError,
+        
     }
 
   

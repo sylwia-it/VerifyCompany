@@ -20,7 +20,7 @@ namespace ExcelDataManager.Lib.Export
         private List<ColumnConfig> _columnsConfig;
         private string _prefixOfHeaders;
         private List<string> _sheetNamesToExclude; //name of sheet that shall be considered as source
-        Dictionary<string, bool> _overallVerificationResult = new Dictionary<string, bool>();
+        Dictionary<string, OverallResult> _overallVerificationResult = new Dictionary<string, OverallResult>();
 
         private const int AllAccountsColumnDelta = 1;
         private const int FullNameColumnDelta = 2;
@@ -85,7 +85,7 @@ namespace ExcelDataManager.Lib.Export
                 int lpColumn = GetLpColumn(worksheet, headerRow);
                 foreach (var verifiedNip in verifiedNips)
                 {
-                    _overallVerificationResult.Add(verifiedNip.Key, true);
+                    _overallVerificationResult.Add(verifiedNip.Key, OverallResult.OK);
                 }
 
                 ClearEarlierResultsIfPresent(worksheet, headerRow, lastColumn, companiesReadFromFile);
@@ -120,6 +120,7 @@ namespace ExcelDataManager.Lib.Export
 
         private const string VerOKMsg = "OK";
         private const string VerFailedMsg = "Błąd";
+        private const string VerWarningMsg = "Ostrzeżenie";
         private void AddOverallResultsToFile(Worksheet worksheet, int headerRow, int lastColumn, int nipColumn, int lpColumn, List<InputCompany> companiesReadFromFile)
         {
             int overallVerColumn = lastColumn + AllVerificationStatusColumnDelta;
@@ -135,11 +136,17 @@ namespace ExcelDataManager.Lib.Export
 
                 var result = _overallVerificationResult[company.ID];
 
-                if (result == false)
+                if (result == OverallResult.Error)
                 {
                     ((Range)worksheet.Cells[company.RowNumber, overallVerColumn]).Formula = VerFailedMsg;
                     ((Range)worksheet.Cells[company.RowNumber, overallVerColumn]).Font.Color = XlRgbColor.rgbWhite;
                     ((Range)worksheet.Cells[company.RowNumber, overallVerColumn]).Interior.Color = XlRgbColor.rgbRed;
+                } 
+                else if (result == OverallResult.Warning)
+                {
+                    ((Range)worksheet.Cells[company.RowNumber, overallVerColumn]).Formula = VerWarningMsg;
+                    ((Range)worksheet.Cells[company.RowNumber, overallVerColumn]).Font.Color = XlRgbColor.rgbWhite;
+                    ((Range)worksheet.Cells[company.RowNumber, overallVerColumn]).Interior.Color = XlRgbColor.rgbOrange;
                 }
                 else
                 {
@@ -171,8 +178,15 @@ namespace ExcelDataManager.Lib.Export
 
                     ((Range)worksheet.Cells[company.RowNumber, whiteListVerColumn]).Formula = result;
 
-                    if (verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull || verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerAccountOKVerSuccessfull || verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerButGivenAccountWrong || verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerButHasNoAccounts)
-                        _overallVerificationResult[verificationResult.Key] = false;
+                    if (verificationResult.Value.VerificationStatus == WhiteListVerResultStatus.ActiveVATPayerVerScuccessButGivenAccountNotVerified &&
+                        _overallVerificationResult[verificationResult.Key] != OverallResult.Error)
+                    {
+                        _overallVerificationResult[verificationResult.Key] = OverallResult.Warning;
+                    }
+                    else if (verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull || verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerAccountOKVerSuccessfull || verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerButGivenAccountWrong || verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerButHasNoAccounts)
+                    {
+                        _overallVerificationResult[verificationResult.Key] = OverallResult.Error;
+                    } 
                 }
             }
         }
@@ -200,7 +214,7 @@ namespace ExcelDataManager.Lib.Export
                     ((Range)worksheet.Cells[company.RowNumber, regonVerColumn]).Formula = result;
 
                     if (isCompanyActiveStatus.Value != BiRVerifyStatus.IsActive)
-                        _overallVerificationResult[isCompanyActiveStatus.Key] = false;
+                        _overallVerificationResult[isCompanyActiveStatus.Key] = OverallResult.Error;
                 }
 
             }
@@ -230,7 +244,7 @@ namespace ExcelDataManager.Lib.Export
                     ((Range)worksheet.Cells[company.RowNumber, nipVerColumn]).Formula = result;
 
                     if (nipVerifyStatus.Value != VerifyNIPResult.IsActiveVATPayer)
-                        _overallVerificationResult[nipVerifyStatus.Key] = false;
+                        _overallVerificationResult[nipVerifyStatus.Key] = OverallResult.Error;
                 }
 
             }

@@ -183,7 +183,7 @@ namespace VerifyWhiteListCompany.Lib
             {
                 if (companyToVerify.BankAccountNumber is null)
                 {
-                    tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull;
+                    tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerVerScuccessButGivenAccountNotVerified;
                     tempWhiteListVerResult.SetVerStatusMessage(_activeButAccountNotGivenResponseMsg);
 
                 }
@@ -208,7 +208,7 @@ namespace VerifyWhiteListCompany.Lib
                 else if (string.IsNullOrEmpty(tempWhiteListVerResult.GivenAccountNumber))
                 {
 
-                    tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull;
+                    tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.ActiveVATPayerVerScuccessButGivenAccountNotVerified;
                     tempWhiteListVerResult.SetVerStatusMessage(_activeButAccountNotGivenResponseMsg);
                 }
                 else

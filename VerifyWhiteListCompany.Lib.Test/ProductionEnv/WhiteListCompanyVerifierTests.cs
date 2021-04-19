@@ -161,11 +161,12 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
             Assert.IsTrue(DTHelper.IsItToday(companyChecked.Value.VerificationDate));
             Assert.IsFalse(companyChecked.Value.IsGivenAccountNumOnWhiteList);
 
+            
             for (int i = 2; i < 4; i++)
             {
                 companyChecked = verResults.FirstOrDefault(vr => vr.Key == companiesToCheck.ElementAt(i).Key);
                 Assert.IsNotNull(companyChecked);
-                Assert.AreEqual(WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull, companyChecked.Value.VerificationStatus);
+                Assert.AreEqual(WhiteListVerResultStatus.ActiveVATPayerVerScuccessButGivenAccountNotVerified, companyChecked.Value.VerificationStatus);
                 Assert.IsTrue(companyChecked.Value.IsActiveVATPayer);
                 Assert.AreEqual(companiesToCheck.ElementAt(i).Value.NIP, companyChecked.Value.Nip);
                 Assert.IsNotNull(companyChecked.Value.AccountNumbers);
