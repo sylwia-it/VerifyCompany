@@ -33,7 +33,7 @@ namespace DocumentGenerator.Lib.Helpers
                 }
                 return true;
 
-            } catch (Exception e)
+            } catch 
             {
                 return false;
             }

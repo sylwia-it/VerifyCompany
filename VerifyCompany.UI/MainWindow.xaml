@@ -36,7 +36,7 @@
             <Label Style="{StaticResource InstructionLabelStyle}">Opcje Sprawdzania:</Label>
             <Expander IsExpanded="False" Header="Systemy do sprawdzadnia" FontSize="13">
             <StackPanel>
-            <CheckBox x:Name="nipActivePayerCB"  VerticalContentAlignment="Top" Margin="20,3,0,3" FontSize="12" IsChecked="True">
+            <CheckBox x:Name="verifyCompaniesInNipSystemCB"  VerticalContentAlignment="Top" Margin="20,3,0,3" FontSize="12" IsChecked="True">
                 <CheckBox.Content>
                     <TextBlock TextWrapping="Wrap">System NIP</TextBlock>
                 </CheckBox.Content>
@@ -44,7 +44,7 @@
                     <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
                 </CheckBox.LayoutTransform>
             </CheckBox>
-                <CheckBox x:Name="systemBiRCB"  VerticalContentAlignment="Top" Margin="20,3,0,3" FontSize="12" IsChecked="True">
+                <CheckBox x:Name="verifyCompaniesInBiRSystemCB"  VerticalContentAlignment="Top" Margin="20,3,0,3" FontSize="12" IsChecked="True">
                     <CheckBox.Content>
                         <TextBlock TextWrapping="Wrap">System BiR</TextBlock>
                     </CheckBox.Content>
@@ -52,7 +52,7 @@
                         <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
                     </CheckBox.LayoutTransform>
                 </CheckBox>
-                <CheckBox x:Name="systemWhiteListCB"  VerticalContentAlignment="Top" Margin="20,3,0,3" FontSize="12" IsChecked="True">
+                <CheckBox x:Name="verifyCompaniesInWhiteListSystemCB"  VerticalContentAlignment="Top" Margin="20,3,0,3" FontSize="12" IsChecked="True">
                     <CheckBox.Content>
                         <TextBlock TextWrapping="Wrap">System Lista Białych Firm</TextBlock>
                     </CheckBox.Content>
@@ -66,7 +66,7 @@
        
         <StackPanel Grid.Row="3" Margin="0,0,0,10">
             <Label Style="{StaticResource InstructionLabelStyle}">Opcje Importu danych:</Label>
-            <CheckBox x:Name="onlyWithDatesCB"  VerticalContentAlignment="Top" Margin="20,3,0,3" FontSize="12">
+            <CheckBox x:Name="importCompaniesOnlyWithPaymentDateCB"  VerticalContentAlignment="Top" Margin="20,3,0,3" FontSize="12">
                 <CheckBox.Content>
                     <TextBlock TextWrapping="Wrap">Importuj TYLKO pozycje z datą zapłaty</TextBlock>
                 </CheckBox.Content>
@@ -78,7 +78,7 @@
 
         <StackPanel Grid.Row="4" Margin="0,0,0,10">
             <Label  Style="{StaticResource InstructionLabelStyle}" >Opcje Wyniku sprawdzenia:</Label>
-            <CheckBox x:Name="separateColumns"  VerticalContentAlignment="Top" Margin="20,3,0,3" FontSize="12" >
+            <CheckBox x:Name="addAccountsInSeparateColumnsCB"  VerticalContentAlignment="Top" Margin="20,3,0,3" FontSize="12" >
                 <CheckBox.LayoutTransform>
                     <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
                 </CheckBox.LayoutTransform>
@@ -98,7 +98,7 @@
 
         <StackPanel Grid.Row="6" Margin="0,0,0,10">
             <Label  Style="{StaticResource InstructionLabelStyle}" >Wybierz plik:</Label>
-            <Button x:Name="selectFileBtn" Height="50" Width="150" HorizontalAlignment="Left" Margin="50,10,10,10">Wybierz plik i sprawdź</Button>
+            <Button x:Name="selectFileBtn" Click="selectFileBtn_Click" Height="50" Width="150" HorizontalAlignment="Left" Margin="50,10,10,10">Wybierz plik i sprawdź</Button>
         </StackPanel>
         <Label Grid.Row="7" Style="{StaticResource InstructionLabelStyle}" >Rezultaty:</Label>
         <TextBox Grid.Row="8" x:Name="resultTBl" IsManipulationEnabled="True" IsReadOnly="True" VerticalScrollBarVisibility="Auto"></TextBox>

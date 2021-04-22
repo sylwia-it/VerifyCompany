@@ -22,7 +22,7 @@ namespace ExcelDataManager.Lib
 
         public static int FindHeaderRow(Worksheet worksheet, List<ColumnConfig> columnsConfig)
         {
-            string nipHeaderCaption = columnsConfig.FirstOrDefault(c => c.ID.Contains(ImportColumnName.NIP.ToString(), StringComparison.OrdinalIgnoreCase)).HeaderText;
+            string nipHeaderCaption = columnsConfig.FirstOrDefault(c => c.ID.Contains(ImportColumnName.NIP.ToString().ToLower())).HeaderText;
 
             //Recognize the header row by looking for them in the first 75 columns and first 10 rows
             for (int row = 1; row <= 10; row++)

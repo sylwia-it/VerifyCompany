@@ -348,7 +348,7 @@ namespace ExcelDataManager.Lib.Export
 
         private int GetLpColumn(Worksheet worksheet, int headerRow)
         {
-            string lpHeaderCaption = _columnsConfig.FirstOrDefault(c => c.ID.Contains(ImportColumnName.LP.ToString(), StringComparison.OrdinalIgnoreCase)).HeaderText;
+            string lpHeaderCaption = _columnsConfig.FirstOrDefault(c => c.ID.Contains(ImportColumnName.LP.ToString().ToLower())).HeaderText;
 
             for (int column = 1; column <= 75; column++)
             {
@@ -363,7 +363,7 @@ namespace ExcelDataManager.Lib.Export
 
         private int GetNipColumn(Worksheet worksheet, int headerRow)
         {
-            string nipHeaderCaption = _columnsConfig.FirstOrDefault(c => c.ID.Contains(ImportColumnName.NIP.ToString(), StringComparison.OrdinalIgnoreCase)).HeaderText;
+            string nipHeaderCaption = _columnsConfig.FirstOrDefault(c => c.ID.Contains(ImportColumnName.NIP.ToString())).HeaderText;
 
             for (int column = 1; column <= 75; column++)
             {

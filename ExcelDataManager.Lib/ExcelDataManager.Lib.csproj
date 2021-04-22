@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFrameworks>net5.0;net472</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
@@ -25,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\VerifyActiveCompany.Lib\VerifyActiveCompany.Lib.csproj" />
+    <ProjectReference Include="..\VerifyWhiteListCompany.Lib\VerifyWhiteListCompany.Lib.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,11 +44,6 @@
   <ItemGroup>
     <Reference Include="VerifyNIPActivePayer.Lib">
       <HintPath>..\VerifyNIPActivePayer.Lib\bin\$(Configuration)\netcoreapp3.1\VerifyNIPActivePayer.Lib.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="VerifyWhiteListCompany.Lib">
-      <HintPath>..\VerifyWhiteListCompany.Lib\bin\$(Configuration)\netcoreapp3.1\VerifyWhiteListCompany.Lib.dll</HintPath>
     </Reference>
   </ItemGroup>
 

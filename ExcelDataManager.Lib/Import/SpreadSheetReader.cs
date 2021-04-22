@@ -87,15 +87,12 @@ namespace ExcelDataManager.Lib.Import
                     theWorkbook.Close(Type.Missing, Type.Missing, Type.Missing);
                 if (app != null)
                     app.Quit();
-                if (e as SpreadSheetReaderException != null)
-                {
-                    throw e;
-                }
-                else
+                if (e as SpreadSheetReaderException == null)
                 {
                     throw new Exception("Nieznany błąd podczas importu!" + e.Message, e);
                 }
 
+                return null;
             }
         }
 
@@ -319,19 +316,19 @@ namespace ExcelDataManager.Lib.Import
             {
                 var tempCellContent = ((string)((Range)worksheet.Cells[HeaderRow, column]).Formula).ToLower().Trim();
 
-                if (tempCellContent.Contains(nipCaption, StringComparison.OrdinalIgnoreCase))
+                if (tempCellContent.Contains(nipCaption.ToLower()))
                 {
                     ColumnMapping.Add(ImportColumnName.NIP, column);
                 }
-                else if (tempCellContent.Contains(idCaption, StringComparison.OrdinalIgnoreCase))
+                else if (tempCellContent.Contains(idCaption.ToLower()))
                 {
                     ColumnMapping.Add(ImportColumnName.LP, column);
                 }
-                else if (tempCellContent.Contains(accountHeaderCaption, StringComparison.OrdinalIgnoreCase))
+                else if (tempCellContent.Contains(accountHeaderCaption.ToLower()))
                 {
                     ColumnMapping.Add(ImportColumnName.AccountNumber, column);
                 }
-                else if (tempCellContent.Contains(paymentDateCaption, StringComparison.OrdinalIgnoreCase))
+                else if (tempCellContent.Contains(paymentDateCaption.ToLower()))
                 {
                     ColumnMapping.Add(ImportColumnName.PaymentDate, column);
                 }
