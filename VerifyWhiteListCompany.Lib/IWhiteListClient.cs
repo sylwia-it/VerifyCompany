@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using VerifyWhiteListCompany.Lib.WebServiceModel;
+using System;
 
 namespace VerifyWhiteListCompany.Lib
 {
@@ -7,6 +8,6 @@ namespace VerifyWhiteListCompany.Lib
     {
         void Init(string url);
 
-        Task<EntryListResponse> VerifyCompanies(string nips);
+        Task<EntryListResponse> VerifyCompanies(string nips, DateTime date);
     }
 }

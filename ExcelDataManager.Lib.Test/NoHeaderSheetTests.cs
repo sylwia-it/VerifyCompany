@@ -17,7 +17,7 @@ namespace ExcelDataManager.Lib.Test
         {
             FileInfo fI = new FileInfo(_filePath);
             if (fI.Exists)
-                _ssr = new SpreadSheetReader(fI.FullName, true);
+                _ssr = new SpreadSheetReader(fI.FullName, true, true);
             else
                 throw new FileLoadException("cannot load the input file");
         }
@@ -25,7 +25,7 @@ namespace ExcelDataManager.Lib.Test
         [Test]
         public void ReadWorkbookWithNoHeaderTest()
         {
-           SpreadSheetReaderException e = Assert.Throws<SpreadSheetReaderException>(()=>_ssr.ReadDataFromFile());
+            SpreadSheetReaderHeaderException e = Assert.Throws<SpreadSheetReaderHeaderException>(() => _ssr.ReadDataFromFile());
             Assert.IsTrue(e.Message.Contains("nag³ówka")); 
         }
 

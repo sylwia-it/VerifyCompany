@@ -17,7 +17,8 @@ namespace ExcelDataManager.Lib.Export
     public class SpreadSheetWriter
     {
         private string _exportFilePath;
-        private List<ColumnConfig> _columnsConfig;
+        private List<ColumnConfig> _importColumnsConfig;
+        private List<ColumnConfig> _exportColumnsConfig;
         private readonly string _prefixOfHeaders;
         private List<string> _sheetNamesToExclude; //name of sheet that shall be considered as source
         Dictionary<string, OverallResult> _overallVerificationResult = new Dictionary<string, OverallResult>();
@@ -31,28 +32,35 @@ namespace ExcelDataManager.Lib.Export
         private const int WhiteListVerificationStatusColumnDelta = 6;
         private const int NIPVerficationStatusColumnDelta = 7;
         private const int REGONVerificationStatusColumnDelta = 8;
+        private const int WhiteListVerificationForInvoiceDateStatusColumnDelta = 9;
+        private const int WhiteListVerificationForInvoiceDateConfirmAndDateColumnDelta = 10;
+        private const int InputErrorColumnDelta = 11;
 
-        private const int DateColumnDelta = 9;
-        private const int StringConfIDColumnDelta = 10;
-        private const int AccountSeparteColumnStartDelta = 11;
-        private int _numberOfColumnsToClean = 12 + 20;
+        private const int DateColumnDelta = 12;
+        private const int StringConfIDColumnDelta = 13;
+        private const int AccountSeparteColumnStartDelta = 14;
+        private int _numberOfColumnsToClean = 14 + 20;
+        private const string _notChecked = "Firma NIE była sprawdzana w systemie";
+
         public SpreadSheetWriter(string exportFilePath)
         {
             _exportFilePath = exportFilePath;
             IConfiguration configuration = new ConfigurationBuilder()
                .AddJsonFile("importSettings.json", true, true)
                .Build();
-            _columnsConfig = configuration.GetSection("ExportColumnsConfig").Get<List<ColumnConfig>>();
+            _importColumnsConfig = configuration.GetSection("InputColumnsConfig").Get<List<ColumnConfig>>();
+            _exportColumnsConfig = configuration.GetSection("ExportColumnsConfig").Get<List<ColumnConfig>>();
             _sheetNamesToExclude = configuration.GetSection("InputSheetNameExclude").Get<List<string>>();
             _prefixOfHeaders = configuration.GetSection("ExportStartLettersInHeader").Get<string>();
 
-            if (_columnsConfig.Count != Enum.GetNames(typeof(ExportColumnName)).Length)
+            if (_importColumnsConfig.Count != Enum.GetNames(typeof(ImportColumnName)).Length ||
+                _exportColumnsConfig.Count != Enum.GetNames(typeof(ExportColumnName)).Length)
                 throw new SpreadSheetWriterExcpetion("W pliku konfiguracyjnym brakuje wszyskich komumn.");
      
         }
 
         
-       public void WriteResultsToFile(List<InputCompany> companiesReadFromFile, Dictionary<string, VerifyNIPResult> verifiedNips, Dictionary<string, BiRVerifyStatus> areCompaniesActive, Dictionary<string, WhiteListVerResult> verifiedCompanies, bool addAccountsToSeparateColumns)
+       public void WriteResultsToFile(List<InputCompany> companiesReadFromFile, List<InputCompany> erroredWhileReadingInputFileCompanies, Dictionary<string, VerifyNIPResult> verifiedNips, Dictionary<string, BiRVerifyResult> areCompaniesActive, Dictionary<string, WhiteListVerResult> verifiedCompanies, Dictionary<string, WhiteListVerResult> verifiedCompaniesForInvoiceDate, bool addAccountsToSeparateColumns)
         {
             Application app = null;
             Workbook theWorkbook = null;
@@ -79,23 +87,30 @@ namespace ExcelDataManager.Lib.Export
                     worksheet = (Worksheet)sheets.get_Item(i);
                 }
 
-                int headerRow = SpreadSheetHelper.FindHeaderRow(worksheet, _columnsConfig);
+                int headerRow = SpreadSheetHelper.FindHeaderRow(worksheet, _importColumnsConfig);
                 int lastColumn = GetLastColumnWithOriginalData(worksheet, headerRow);
                 int nipColumn = GetNipColumn(worksheet, headerRow);
                 int lpColumn = GetLpColumn(worksheet, headerRow);
-                foreach (var verifiedNip in verifiedNips)
+                foreach (var company in companiesReadFromFile)
                 {
-                    _overallVerificationResult.Add(verifiedNip.Key, OverallResult.OK);
+                    _overallVerificationResult.Add(company.ID, OverallResult.OK);
                 }
 
-                ClearEarlierResultsIfPresent(worksheet, headerRow, lastColumn, companiesReadFromFile);
+                ClearEarlierResultsIfPresent(worksheet, headerRow, lastColumn, companiesReadFromFile, erroredWhileReadingInputFileCompanies);
 
                 AddCompanyDataAndVerConfirmation(worksheet, headerRow, lastColumn, nipColumn, lpColumn, companiesReadFromFile,  verifiedCompanies, addAccountsToSeparateColumns);
                 AddNIPVerification(worksheet, headerRow, lastColumn, nipColumn, lpColumn, companiesReadFromFile, verifiedNips);
                 AddREGONVerification(worksheet, headerRow, lastColumn, nipColumn, lpColumn, companiesReadFromFile, areCompaniesActive);
                 AddWhiteListVerification(worksheet, headerRow, lastColumn, nipColumn, lpColumn, companiesReadFromFile, verifiedCompanies);
-                AddOverallResultsToFile(worksheet, headerRow, lastColumn, nipColumn, lpColumn, companiesReadFromFile);
+                if (verifiedCompaniesForInvoiceDate != null && verifiedCompaniesForInvoiceDate.Count > 0)
+                {
+                    AddWhiteListVerificationForInvoiceDate(worksheet, headerRow, lastColumn, nipColumn, lpColumn, companiesReadFromFile, verifiedCompaniesForInvoiceDate);
+                }
+                
+                AddErroredWhileReadingInputCompanies(worksheet, headerRow, lastColumn, nipColumn, lpColumn, erroredWhileReadingInputFileCompanies);
+                AddOverallResultsToFile(worksheet, headerRow, lastColumn, nipColumn, lpColumn, companiesReadFromFile, erroredWhileReadingInputFileCompanies);
 
+              
                 theWorkbook.Save();
                 theWorkbook.Close(true, _exportFilePath, Type.Missing); //true = save changes
                 app.Quit();
@@ -121,15 +136,16 @@ namespace ExcelDataManager.Lib.Export
         private const string VerOKMsg = "OK";
         private const string VerFailedMsg = "Błąd";
         private const string VerWarningMsg = "Ostrzeżenie";
-        private void AddOverallResultsToFile(Worksheet worksheet, int headerRow, int lastColumn, int nipColumn, int lpColumn, List<InputCompany> companiesReadFromFile)
+        private void AddOverallResultsToFile(Worksheet worksheet, int headerRow, int lastColumn, int nipColumn, int lpColumn, List<InputCompany> companiesReadFromFile, List<InputCompany> erroredWhileReadingInputFileCompanies)
         {
             int overallVerColumn = lastColumn + AllVerificationStatusColumnDelta;
-            ((Range)worksheet.Cells[headerRow, overallVerColumn]).Formula = _columnsConfig.First(c=> c.ID == ExportColumnName.ALLVerificationStatusHeader.ToString());
-            foreach (var company in companiesReadFromFile)
+            ((Range)worksheet.Cells[headerRow, overallVerColumn]).Formula = _exportColumnsConfig.First(c=> c.ID == ExportColumnName.ALLVerificationStatusHeader.ToString()).HeaderText;
+            var allCompaniesRead = companiesReadFromFile.Concat(erroredWhileReadingInputFileCompanies);
+            foreach (var company in allCompaniesRead)
             {
                 string nipFromCell = ((Range)worksheet.Cells[company.RowNumber, nipColumn]).Formula.ToString().Trim();
                 string lpFromCell = ((Range)worksheet.Cells[company.RowNumber, lpColumn]).Formula.ToString().Trim();
-                if (company.ID != InputCompany.GetID(lpFromCell, nipFromCell))
+                if (company.ID != InputCompany.GetID(company.RowNumber, lpFromCell, nipFromCell))
                 {
                     throw new ArgumentException("Nip z odpowiedzi serwera różny od nipu z pliku. Błąd przy zapisie overall result do pliku.");
                 }
@@ -159,62 +175,120 @@ namespace ExcelDataManager.Lib.Export
         private void AddWhiteListVerification(Worksheet worksheet, int headerRow, int lastColumn, int nipColumn, int lpColumn, List<InputCompany> companiesReadFromFile, Dictionary<string, WhiteListVerResult> verifiedCompanies)
         {
             int whiteListVerColumn = lastColumn + WhiteListVerificationStatusColumnDelta;
-            ((Range)worksheet.Cells[headerRow, whiteListVerColumn]).Formula = _columnsConfig.First(c=>c.ID == ExportColumnName.WhiteListVerificationStatusHeader.ToString());
+            ((Range)worksheet.Cells[headerRow, whiteListVerColumn]).Formula = _exportColumnsConfig.First(c=>c.ID == ExportColumnName.WhiteListVerificationStatusHeader.ToString()).HeaderText;
 
             foreach (var company in companiesReadFromFile)
             {
                 string nipFromCell = ((Range)worksheet.Cells[company.RowNumber, nipColumn]).Formula.ToString().Trim();
                 string lpFromCell = ((Range)worksheet.Cells[company.RowNumber, lpColumn]).Formula.ToString().Trim();
-                if (company.ID != InputCompany.GetID(lpFromCell, nipFromCell))
+                if (company.ID != InputCompany.GetID(company.RowNumber, lpFromCell, nipFromCell))
                 {
                     throw new ArgumentException($"Nip z odpowiedzi serwera różny od nipu z pliku. Błąd przy zapisie wyniku białej listy do pliku. Z serwera: NIP={company.NIP}, LP={company.LP}; z pliku: NIP={nipFromCell}, LP={lpFromCell}.");
                 }
-                var verificationResult = verifiedCompanies.FirstOrDefault(vN => vN.Key == company.ID);
 
-
-                if (!verificationResult.Equals(default(KeyValuePair<string, WhiteListVerResult>)))
+                if (verifiedCompanies != null)
                 {
-                    var result = verificationResult.Value.ToMessage();
+                    var verificationResult = verifiedCompanies.FirstOrDefault(vN => vN.Key == company.ID);
 
-                    ((Range)worksheet.Cells[company.RowNumber, whiteListVerColumn]).Formula = result;
-
-                    if (verificationResult.Value.VerificationStatus == WhiteListVerResultStatus.ActiveVATPayerVerScuccessButGivenAccountNotVerified &&
-                        _overallVerificationResult[verificationResult.Key] != OverallResult.Error)
+                    if (!verificationResult.Equals(default(KeyValuePair<string, WhiteListVerResult>)))
                     {
-                        _overallVerificationResult[verificationResult.Key] = OverallResult.Warning;
+                        var result = verificationResult.Value.ToMessage();
+
+                        ((Range)worksheet.Cells[company.RowNumber, whiteListVerColumn]).Formula = result;
+
+                        if (verificationResult.Value.VerificationStatus == WhiteListVerResultStatus.ActiveVATPayerVerScuccessButGivenAccountNotVerified &&
+                            _overallVerificationResult[verificationResult.Key] != OverallResult.Error)
+                        {
+                            _overallVerificationResult[verificationResult.Key] = OverallResult.Warning;
+                        }
+                        else if (verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull && verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerAccountOKVerSuccessfull && verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerButGivenAccountWrong && verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerButHasNoAccounts)
+                        {
+                            _overallVerificationResult[verificationResult.Key] = OverallResult.Error;
+                        }
                     }
-                    else if (verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull || verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerAccountOKVerSuccessfull || verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerButGivenAccountWrong || verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerButHasNoAccounts)
-                    {
-                        _overallVerificationResult[verificationResult.Key] = OverallResult.Error;
-                    } 
+                } else
+                {
+                    ((Range)worksheet.Cells[company.RowNumber, whiteListVerColumn]).Formula = _notChecked;
                 }
             }
         }
 
-        private void AddREGONVerification(Worksheet worksheet, int headerRow, int lastColumn, int nipColumn, int lpColumn, List<InputCompany> companiesReadFromFile, Dictionary<string, BiRVerifyStatus> areCompaniesActive)
+        private void AddWhiteListVerificationForInvoiceDate(Worksheet worksheet, int headerRow, int lastColumn, int nipColumn, int lpColumn, List<InputCompany> companiesReadFromFile, Dictionary<string, WhiteListVerResult> verifiedCompaniesForInvoiceDate)
         {
-            int regonVerColumn = lastColumn + REGONVerificationStatusColumnDelta;
-            ((Range)worksheet.Cells[headerRow, regonVerColumn]).Formula = _columnsConfig.First(c => c.ID == ExportColumnName.REGONVerificationStatusHeader.ToString());
+            int whiteListVerColumnForInvoiceDate = lastColumn + WhiteListVerificationForInvoiceDateStatusColumnDelta;
+            int whiteListVerColumnForInvoiceDateConfirmString = lastColumn + WhiteListVerificationForInvoiceDateConfirmAndDateColumnDelta;
+
+            ((Range)worksheet.Cells[headerRow, whiteListVerColumnForInvoiceDate]).Formula = _exportColumnsConfig.First(c => c.ID == ExportColumnName.WhiteListVerificationForInvoiceDateStatusHeader.ToString()).HeaderText;
+            ((Range)worksheet.Cells[headerRow, whiteListVerColumnForInvoiceDateConfirmString]).Formula = _exportColumnsConfig.First(c => c.ID == ExportColumnName.WhiteListVerificationForInvoiceDateConfirmAndDateHeader.ToString()).HeaderText;
 
             foreach (var company in companiesReadFromFile)
             {
                 string nipFromCell = ((Range)worksheet.Cells[company.RowNumber, nipColumn]).Formula.ToString().Trim();
                 string lpFromCell = ((Range)worksheet.Cells[company.RowNumber, lpColumn]).Formula.ToString().Trim();
-                if (company.ID != InputCompany.GetID(lpFromCell, nipFromCell))
+                if (company.ID != InputCompany.GetID(company.RowNumber, lpFromCell, nipFromCell))
+                {
+                    throw new ArgumentException($"Nip z odpowiedzi serwera różny od nipu z pliku. Błąd przy zapisie wyniku białej listy do pliku na dzień faktury. Z serwera: NIP={company.NIP}, LP={company.LP}; z pliku: NIP={nipFromCell}, LP={lpFromCell}.");
+                }
+
+                if (verifiedCompaniesForInvoiceDate != null)
+                {
+                    var verificationResult = verifiedCompaniesForInvoiceDate.FirstOrDefault(vN => vN.Key == company.ID);
+
+                    if (!verificationResult.Equals(default(KeyValuePair<string, WhiteListVerResult>)))
+                    {
+                        var result = verificationResult.Value.ToMessage();
+
+                        ((Range)worksheet.Cells[company.RowNumber, whiteListVerColumnForInvoiceDate]).Formula = result;
+                        ((Range)worksheet.Cells[company.RowNumber, whiteListVerColumnForInvoiceDateConfirmString]).Formula = $"{verificationResult.Value.VerificationDate} - {verificationResult.Value.ConfirmationResponseString}";
+
+                        if (verificationResult.Value.VerificationStatus == WhiteListVerResultStatus.ActiveVATPayerVerScuccessButGivenAccountNotVerified &&
+                            _overallVerificationResult[verificationResult.Key] != OverallResult.Error)
+                        {
+                            _overallVerificationResult[verificationResult.Key] = OverallResult.Warning;
+                        }
+                        else if (verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull && verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerAccountOKVerSuccessfull && verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerButGivenAccountWrong && verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerButHasNoAccounts)
+                        {
+                            _overallVerificationResult[verificationResult.Key] = OverallResult.Error;
+                        }
+                    }
+                }
+                else
+                {
+                    ((Range)worksheet.Cells[company.RowNumber, whiteListVerColumnForInvoiceDate]).Formula = _notChecked;
+                }
+            }
+        }
+        private void AddREGONVerification(Worksheet worksheet, int headerRow, int lastColumn, int nipColumn, int lpColumn, List<InputCompany> companiesReadFromFile, Dictionary<string, BiRVerifyResult> areCompaniesActive)
+        {
+            int regonVerColumn = lastColumn + REGONVerificationStatusColumnDelta;
+            ((Range)worksheet.Cells[headerRow, regonVerColumn]).Formula = _exportColumnsConfig.First(c => c.ID == ExportColumnName.REGONVerificationStatusHeader.ToString()).HeaderText;
+
+            foreach (var company in companiesReadFromFile)
+            {
+                string nipFromCell = ((Range)worksheet.Cells[company.RowNumber, nipColumn]).Formula.ToString().Trim();
+                string lpFromCell = ((Range)worksheet.Cells[company.RowNumber, lpColumn]).Formula.ToString().Trim();
+                if (company.ID != InputCompany.GetID(company.RowNumber, lpFromCell, nipFromCell))
                 {
                     throw new ArgumentException($"Nip z odpowiedzi serwera różny od nipu z pliku. Błąd przy zapisie wyniku regon (BiR) do pliku.  Z serwera: NIP={company.NIP}, LP={company.LP}; z pliku: NIP={nipFromCell}, LP={lpFromCell}.");
                 }
 
-                var isCompanyActiveStatus = areCompaniesActive.FirstOrDefault(vN => vN.Key == company.ID);
-
-                if (!isCompanyActiveStatus.Equals(default(KeyValuePair<string, BiRVerifyStatus>)))
+                if (areCompaniesActive != null)
                 {
-                    var result = isCompanyActiveStatus.Value.ToMessage();
+                    var isCompanyActiveStatus = areCompaniesActive.FirstOrDefault(vN => vN.Key == company.ID);
 
-                    ((Range)worksheet.Cells[company.RowNumber, regonVerColumn]).Formula = result;
+                    if (!isCompanyActiveStatus.Equals(default(KeyValuePair<string, BiRVerifyStatus>)))
+                    {
+                        var result = isCompanyActiveStatus.Value.Message;
 
-                    if (isCompanyActiveStatus.Value != BiRVerifyStatus.IsActive)
-                        _overallVerificationResult[isCompanyActiveStatus.Key] = OverallResult.Error;
+                        ((Range)worksheet.Cells[company.RowNumber, regonVerColumn]).Formula = result;
+
+                        if (isCompanyActiveStatus.Value.BiRVerifyStatus != BiRVerifyStatus.IsActive)
+                            _overallVerificationResult[isCompanyActiveStatus.Key] = OverallResult.Error;
+                    }
+                }
+                else
+                {
+                    ((Range)worksheet.Cells[company.RowNumber, regonVerColumn]).Formula = _notChecked;
                 }
 
             }
@@ -223,30 +297,68 @@ namespace ExcelDataManager.Lib.Export
         private void AddNIPVerification(Worksheet worksheet, int headerRow, int lastColumn, int nipColumn, int lpColumn, List<InputCompany> inputCompanies, Dictionary<string, VerifyNIPResult> verifiedNips )
         {
             int nipVerColumn = lastColumn + NIPVerficationStatusColumnDelta;
-            ((Range)worksheet.Cells[headerRow, nipVerColumn]).Formula = _columnsConfig.First(c => c.ID == ExportColumnName.NIPVerificationStatusHeader.ToString());
+            ((Range)worksheet.Cells[headerRow, nipVerColumn]).Formula = _exportColumnsConfig.First(c => c.ID == ExportColumnName.NIPVerificationStatusHeader.ToString()).HeaderText;
 
             foreach (var company in inputCompanies)
             {
 
                 string nipFromCell = ((Range)worksheet.Cells[company.RowNumber, nipColumn]).Formula.ToString().Trim();
                 string lpFromCell = ((Range)worksheet.Cells[company.RowNumber, lpColumn]).Formula.ToString().Trim();
-                if (company.ID != InputCompany.GetID(lpFromCell, nipFromCell))
+                if (company.ID != InputCompany.GetID(company.RowNumber, lpFromCell, nipFromCell))
                 {
                     throw new SpreadSheetWriterExcpetion($"Nip z odpowiedzi serwera różny od nipu z pliku. Błąd przy zapisywaniu wyniku zapytania NIP verification do pliku xls. Z serwera: NIP={company.NIP}, LP={company.LP}; z pliku: NIP={nipFromCell}, LP={lpFromCell}.");
                 }
 
-                var nipVerifyStatus = verifiedNips.FirstOrDefault(vN => vN.Key == company.ID);
-
-
-                if (!nipVerifyStatus.Equals(default(KeyValuePair<string, VerifyNIPResult>)))
+                if (verifiedNips != null)
                 {
-                    var result = nipVerifyStatus.Value.ToMessage();
-                    ((Range)worksheet.Cells[company.RowNumber, nipVerColumn]).Formula = result;
+                    var nipVerifyStatus = verifiedNips.FirstOrDefault(vN => vN.Key == company.ID);
 
-                    if (nipVerifyStatus.Value != VerifyNIPResult.IsActiveVATPayer)
-                        _overallVerificationResult[nipVerifyStatus.Key] = OverallResult.Error;
+
+                    if (!nipVerifyStatus.Equals(default(KeyValuePair<string, VerifyNIPResult>)))
+                    {
+                        var result = nipVerifyStatus.Value.ToMessage();
+                        ((Range)worksheet.Cells[company.RowNumber, nipVerColumn]).Formula = result;
+
+                        if (nipVerifyStatus.Value != VerifyNIPResult.IsActiveVATPayer)
+                            _overallVerificationResult[nipVerifyStatus.Key] = OverallResult.Error;
+                    }
+                }
+                else
+                {
+                    ((Range)worksheet.Cells[company.RowNumber, nipVerColumn]).Formula = _notChecked;
                 }
 
+            }
+        }
+
+        private void AddErroredWhileReadingInputCompanies(Worksheet worksheet, int headerRow, int lastColumn, int nipColumn, int lpColumn, List<InputCompany> verifiedCompanies)
+        {
+            int inputErrorColumn = lastColumn + InputErrorColumnDelta;
+            ((Range)worksheet.Cells[headerRow, inputErrorColumn]).Formula = _exportColumnsConfig.First(c => c.ID == ExportColumnName.ImportFileError.ToString()).HeaderText;
+
+            foreach (var company in verifiedCompanies)
+            {
+                string nipFromCell = ((Range)worksheet.Cells[company.RowNumber, nipColumn]).Formula.ToString().Trim();
+                string lpFromCell = ((Range)worksheet.Cells[company.RowNumber, lpColumn]).Formula.ToString().Trim();
+                if (company.ID != InputCompany.GetID(company.RowNumber, lpFromCell, nipFromCell))
+                {
+                    throw new ArgumentException($"Nip wczytany z pliku różny od nipu z pliku wyjściowego. Błąd przy zapisie wyniku importu danych z pliku. Z pliku wejściowego: NIP={company.NIP}, LP={company.LP}; z pliku wyjściowego: NIP={nipFromCell}, LP={lpFromCell}.");
+                }
+
+                if (company.FormatErrors != null && company.FormatErrors.Count > 0)
+                {
+                    StringBuilder sB = new StringBuilder();
+                    foreach (var error in company.FormatErrors)
+                    {
+                        sB.Append($"{error.ToMessage()} ");
+                    }
+
+                    ((Range)worksheet.Cells[company.RowNumber, inputErrorColumn]).Formula = sB.ToString().Trim();
+                    ((Range)worksheet.Cells[company.RowNumber, inputErrorColumn]).Font.Color = XlRgbColor.rgbWhite;
+                    ((Range)worksheet.Cells[company.RowNumber, inputErrorColumn]).Interior.Color = XlRgbColor.rgbRed;
+
+                    _overallVerificationResult[company.ID] = OverallResult.Error;
+                }
             }
         }
 
@@ -260,12 +372,12 @@ namespace ExcelDataManager.Lib.Export
             int fullResidenceAddressColumn = lastColumn + FullResidenceAddressColumnDelta;
             int fullWorkingAddressColumn = lastColumn + FullWorkingAddressColumnDelta;
 
-            ((Range)worksheet.Cells[headerRow, accountsColumn]).Formula = _columnsConfig.First(c=> c.ID == ExportColumnName.AllAccountsHeader.ToString());
-            ((Range)worksheet.Cells[headerRow, fullNameColumn]).Formula = _columnsConfig.First(c => c.ID == ExportColumnName.FullNameColumnHeader.ToString());
-            ((Range)worksheet.Cells[headerRow, dataColumn]).Formula = _columnsConfig.First(c => c.ID == ExportColumnName.DateColumnHeader.ToString());
-            ((Range)worksheet.Cells[headerRow, stringConfIDColumn]).Formula = _columnsConfig.First(c => c.ID == ExportColumnName.StringConfIDHeader.ToString());
-            ((Range)worksheet.Cells[headerRow, fullResidenceAddressColumn]).Formula = _columnsConfig.First(c => c.ID == ExportColumnName.FullResidenceAddressHeader.ToString());
-            ((Range)worksheet.Cells[headerRow, fullWorkingAddressColumn]).Formula = _columnsConfig.First(c => c.ID == ExportColumnName.FullWorkingAddressHeader.ToString());
+            ((Range)worksheet.Cells[headerRow, accountsColumn]).Formula = _exportColumnsConfig.First(c=> c.ID == ExportColumnName.AllAccountsHeader.ToString()).HeaderText;
+            ((Range)worksheet.Cells[headerRow, fullNameColumn]).Formula = _exportColumnsConfig.First(c => c.ID == ExportColumnName.FullNameColumnHeader.ToString()).HeaderText;
+            ((Range)worksheet.Cells[headerRow, dataColumn]).Formula = _exportColumnsConfig.First(c => c.ID == ExportColumnName.DateColumnHeader.ToString()).HeaderText;
+            ((Range)worksheet.Cells[headerRow, stringConfIDColumn]).Formula = _exportColumnsConfig.First(c => c.ID == ExportColumnName.StringConfIDHeader.ToString()).HeaderText;
+            ((Range)worksheet.Cells[headerRow, fullResidenceAddressColumn]).Formula = _exportColumnsConfig.First(c => c.ID == ExportColumnName.FullResidenceAddressHeader.ToString()).HeaderText;
+            ((Range)worksheet.Cells[headerRow, fullWorkingAddressColumn]).Formula = _exportColumnsConfig.First(c => c.ID == ExportColumnName.FullWorkingAddressHeader.ToString()).HeaderText;
 
             int maxNumberOfAccounts = 0;
             if (addAccountsToSeparateColumns)
@@ -279,14 +391,22 @@ namespace ExcelDataManager.Lib.Export
                 }
             }
 
+            //If e.g., there was no check run in the white list company checker
+            if (verifiedCompanies != null)
+            {
+                AddCompanyData(worksheet, nipColumn, lpColumn, companiesReadFromFile, verifiedCompanies, addAccountsToSeparateColumns, accountsColumn, fullNameColumn, dataColumn, stringConfIDColumn, accountSepColStartingColumn, fullResidenceAddressColumn, fullWorkingAddressColumn);
+            }
 
+        }
 
+        private static void AddCompanyData(Worksheet worksheet, int nipColumn, int lpColumn, List<InputCompany> companiesReadFromFile, Dictionary<string, WhiteListVerResult> verifiedCompanies, bool addAccountsToSeparateColumns, int accountsColumn, int fullNameColumn, int dataColumn, int stringConfIDColumn, int accountSepColStartingColumn, int fullResidenceAddressColumn, int fullWorkingAddressColumn)
+        {
             foreach (var company in companiesReadFromFile)
             {
                 string nipFromCell = ((Range)worksheet.Cells[company.RowNumber, nipColumn]).Formula.ToString().Trim();
                 string lPFromCell = ((Range)worksheet.Cells[company.RowNumber, lpColumn]).Formula.ToString().Trim();
 
-                if (company.ID != InputCompany.GetID(lPFromCell, nipFromCell))
+                if (company.ID != InputCompany.GetID(company.RowNumber, lPFromCell, nipFromCell))
                 {
                     throw new SpreadSheetWriterExcpetion($"Nip z odpowiedzi serwera różny od nipu z pliku. Błąd przy zapisie do pliku. Z serwera: NIP={company.NIP}, LP={company.LP}; z pliku: NIP={nipFromCell}, LP={lPFromCell}.");
                 }
@@ -318,37 +438,46 @@ namespace ExcelDataManager.Lib.Export
 
                 }
             }
-
         }
 
-
-
-        private void ClearEarlierResultsIfPresent(Worksheet worksheet, int headerRow, int lastColumn, List<InputCompany> verifiedCompanies)
+        private void ClearEarlierResultsIfPresent(Worksheet worksheet, int headerRow, int lastColumn, List<InputCompany> verifiedCompanies, List<InputCompany> erroredWhileReadingInputFileCompanies)
         {
             foreach (var company in verifiedCompanies)
             {
                 Range rangeToClean = worksheet.Range[SpreadSheetHelper.ConvertCellAddresFromNumsToLetterNum(company.RowNumber, lastColumn + 1), SpreadSheetHelper.ConvertCellAddresFromNumsToLetterNum(company.RowNumber, lastColumn + _numberOfColumnsToClean)];
-                Borders bordersToClean = rangeToClean.Borders;
-                bordersToClean[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
-                bordersToClean[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
-                bordersToClean[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
-                bordersToClean[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
-                bordersToClean.Color = XlRgbColor.rgbBlack;
-                rangeToClean.Formula = string.Empty;
-                rangeToClean.Font.Color = XlRgbColor.rgbBlack;
-                rangeToClean.Interior.Pattern = XlPattern.xlPatternNone;
+                ClearRange(rangeToClean);
             }
+
+            foreach (var errcompany in erroredWhileReadingInputFileCompanies)
+            {
+                Range rangeToClean = worksheet.Range[SpreadSheetHelper.ConvertCellAddresFromNumsToLetterNum(errcompany.RowNumber, lastColumn + 1), SpreadSheetHelper.ConvertCellAddresFromNumsToLetterNum(errcompany.RowNumber, lastColumn + _numberOfColumnsToClean)];
+                ClearRange(rangeToClean);
+            }
+
             Range headerRange = worksheet.Range[SpreadSheetHelper.ConvertCellAddresFromNumsToLetterNum(headerRow, lastColumn + 1), SpreadSheetHelper.ConvertCellAddresFromNumsToLetterNum(headerRow, lastColumn + _numberOfColumnsToClean)];
             headerRange.Font.Bold = true;
             headerRange.Interior.Color = XlRgbColor.rgbLightGray;
-            headerRange.Formula = string.Empty;
+            //headerRange.Formula = string.Empty;
             headerRange.WrapText = true;
 
         }
 
+        private static void ClearRange(Range rangeToClean)
+        {
+            Borders bordersToClean = rangeToClean.Borders;
+            bordersToClean[XlBordersIndex.xlEdgeLeft].LineStyle = XlLineStyle.xlContinuous;
+            bordersToClean[XlBordersIndex.xlEdgeRight].LineStyle = XlLineStyle.xlContinuous;
+            bordersToClean[XlBordersIndex.xlEdgeTop].LineStyle = XlLineStyle.xlContinuous;
+            bordersToClean[XlBordersIndex.xlEdgeBottom].LineStyle = XlLineStyle.xlContinuous;
+            bordersToClean.Color = XlRgbColor.rgbBlack;
+            rangeToClean.Formula = string.Empty;
+            rangeToClean.Font.Color = XlRgbColor.rgbBlack;
+            rangeToClean.Interior.Pattern = XlPattern.xlPatternNone;
+        }
+
         private int GetLpColumn(Worksheet worksheet, int headerRow)
         {
-            string lpHeaderCaption = _columnsConfig.FirstOrDefault(c => c.ID.Contains(ImportColumnName.LP.ToString().ToLower())).HeaderText;
+            string lpHeaderCaption = _importColumnsConfig.FirstOrDefault(c => c.ID.ToLower().Contains(ImportColumnName.LP.ToString().ToLower())).HeaderText.ToLower();
 
             for (int column = 1; column <= 75; column++)
             {
@@ -363,7 +492,7 @@ namespace ExcelDataManager.Lib.Export
 
         private int GetNipColumn(Worksheet worksheet, int headerRow)
         {
-            string nipHeaderCaption = _columnsConfig.FirstOrDefault(c => c.ID.Contains(ImportColumnName.NIP.ToString())).HeaderText;
+            string nipHeaderCaption = _importColumnsConfig.FirstOrDefault(c => c.ID.ToLower().Contains(ImportColumnName.NIP.ToString().ToLower())).HeaderText.ToLower();
 
             for (int column = 1; column <= 75; column++)
             {
@@ -381,13 +510,13 @@ namespace ExcelDataManager.Lib.Export
         {
             for (int column = 1; column <= 75; column++)
             {
-                var tempCellContent = ((string)((Range)worksheet.Cells[headerRow, column]).Formula).Trim();
+                var tempCellContent = ((string)((Range)worksheet.Cells[headerRow, column]).Formula).Trim().ToLower();
                 if (string.IsNullOrEmpty(tempCellContent))
                 {
                     return column - 1;
 
                 }
-                else if (tempCellContent.StartsWith(_prefixOfHeaders))
+                else if (tempCellContent.StartsWith(_prefixOfHeaders.ToLower()))
                 {
                     return column - 1;
                 }

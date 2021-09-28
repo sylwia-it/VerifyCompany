@@ -123,104 +123,116 @@ namespace VerifyActiveCompany.Lib
         private const string _raportOsPrawnaName = "BIR11OsPrawna";
         private const string _raportOsFizCedigName = "BIR11OsFizycznaDzialalnoscCeidg";
 
-        
+        private int couter = 0;
         public BiRCompany GetCompany(string nip)
         {
-            _lastVerifyStatus = BiRVerifyStatus.NoSearchYet;
-
-            var paramse = new ParametryWyszukiwania();
-            paramse.Nip = nip;
-
-            string errorCode;
-            string result = _client.DaneSzukajPodmioty(paramse);
-            
-
-
-            if (BiRResponseXMLParser.IsResponseEmpty(result) || BiRResponseXMLParser.ContainsError(result))
+            try
             {
-                errorCode = _client.GetValue(_codeOfMessageFromService);
-                Console.WriteLine(errorCode);
-                if (string.IsNullOrEmpty(errorCode) || errorCode.Equals(_errCodeForNoSession))
+                _lastVerifyStatus = BiRVerifyStatus.NoSearchYet;
+
+                var paramse = new ParametryWyszukiwania();
+                paramse.Nip = nip;
+                
+
+                string errorCode;
+                if (couter == 24)
                 {
-                    LogIn(false);
-                    result = _client.DaneSzukajPodmioty(paramse);
+                    Init();
+                    couter = 0;
+                }
+                string result = _client.DaneSzukajPodmioty(paramse);
+                couter++;
+
+
+                if (BiRResponseXMLParser.IsResponseEmpty(result) || BiRResponseXMLParser.ContainsError(result))
+                {
+                    errorCode = _client.GetValue(_codeOfMessageFromService);
+                    Console.WriteLine(errorCode);
+                    if (string.IsNullOrEmpty(errorCode) || errorCode.Equals(_errCodeForNoSession))
+                    {
+                        LogIn(false);
+                        result = _client.DaneSzukajPodmioty(paramse);
+                        if (BiRResponseXMLParser.IsResponseEmpty(result) || BiRResponseXMLParser.ContainsError(result))
+                        {
+                            errorCode = _client.GetValue(_codeOfMessageFromService);
+                        }
+                    }
+
+                    if (!errorCode.Equals(_errCodeForEverythingOK))
+                    {
+                        _lastVerifyStatus = GetStatusFromErrorCode(errorCode, result);
+                        return null;
+                    }
+                }
+
+                BiRCompany company = BiRResponseXMLParser.GetCompanyFromDaneSzukajPodmiotyResponse(result);
+
+                // "P" = Typ podmiotu  rejestru REGON:  jednostka prawna(= osoba  prawna lub  jednostka organizacyjna 
+                // nieposiadająca osobowości prawnej, np.spółka cywilna) 
+                if (company.Type == _prawnaCompanyType)
+                {
+                    company.CompanyType = BiRCompanyType.Prawna;
+                    result = _client.DanePobierzPelnyRaport(company.Regon, _raportOsPrawnaName);
                     if (BiRResponseXMLParser.IsResponseEmpty(result) || BiRResponseXMLParser.ContainsError(result))
                     {
                         errorCode = _client.GetValue(_codeOfMessageFromService);
-                    }
-                } 
-
-                if (!errorCode.Equals(_errCodeForEverythingOK))
-                {
-                    _lastVerifyStatus = GetStatusFromErrorCode(errorCode, result);
-                    return null;
-                }
-            }
-          
-            BiRCompany company = BiRResponseXMLParser.GetCompanyFromDaneSzukajPodmiotyResponse(result);
-
-            // "P" = Typ podmiotu  rejestru REGON:  jednostka prawna(= osoba  prawna lub  jednostka organizacyjna 
-            // nieposiadająca osobowości prawnej, np.spółka cywilna) 
-            if (company.Type == _prawnaCompanyType)
-            {
-                company.CompanyType = BiRCompanyType.Prawna;
-                result = _client.DanePobierzPelnyRaport(company.Regon, _raportOsPrawnaName);
-                if (BiRResponseXMLParser.IsResponseEmpty(result) || BiRResponseXMLParser.ContainsError(result))
-                {
-                    errorCode = _client.GetValue(_codeOfMessageFromService);
-                    if (string.IsNullOrEmpty(errorCode) || errorCode.Equals(_errCodeForNoSession))
-                    {
-                        LogIn(false);
-                        result = _client.DanePobierzPelnyRaport(company.Regon, _raportOsPrawnaName);
-                        if (BiRResponseXMLParser.IsResponseEmpty(result) || BiRResponseXMLParser.ContainsError(result))
+                        if (string.IsNullOrEmpty(errorCode) || errorCode.Equals(_errCodeForNoSession))
                         {
-                            errorCode = _client.GetValue(_codeOfMessageFromService);
+                            LogIn(false);
+                            result = _client.DanePobierzPelnyRaport(company.Regon, _raportOsPrawnaName);
+                            if (BiRResponseXMLParser.IsResponseEmpty(result) || BiRResponseXMLParser.ContainsError(result))
+                            {
+                                errorCode = _client.GetValue(_codeOfMessageFromService);
+                            }
+                        }
+                        if (!errorCode.Equals(_errCodeForEverythingOK))
+                        {
+                            _lastVerifyStatus = GetStatusFromErrorCode(errorCode, result);
+                            return null;
                         }
                     }
-                    if (!errorCode.Equals(_errCodeForEverythingOK))
-                    {
-                        _lastVerifyStatus = GetStatusFromErrorCode(errorCode, result);
-                        return null;
-                    }
-                }
 
-                BiRResponseXMLParser.AddDanePrawna(ref company, result);
-            }
-            // Typ podmiotu rejestru REGON: jedn. fizyczna (= os. fizyczna prowadząca działalność gospodarczą) 
-            else if (company.Type == _osFizycznaCompanyType && company.SilosID == _dzialnoscWpisanaDoCedigSilosType)
-            {
-                company.CompanyType = BiRCompanyType.FizycznaProwadzacaDzialalnoscGosp;
-                result = _client.DanePobierzPelnyRaport(company.Regon, _raportOsFizCedigName);
-                if (BiRResponseXMLParser.IsResponseEmpty(result) || BiRResponseXMLParser.ContainsError(result))
+                    BiRResponseXMLParser.AddDanePrawna(ref company, result);
+                }
+                // Typ podmiotu rejestru REGON: jedn. fizyczna (= os. fizyczna prowadząca działalność gospodarczą) 
+                else if (company.Type == _osFizycznaCompanyType && company.SilosID == _dzialnoscWpisanaDoCedigSilosType)
                 {
-                    errorCode = _client.GetValue(_codeOfMessageFromService);
-                    if (string.IsNullOrEmpty(errorCode) || errorCode.Equals(_errCodeForNoSession))
+                    company.CompanyType = BiRCompanyType.FizycznaProwadzacaDzialalnoscGosp;
+                    result = _client.DanePobierzPelnyRaport(company.Regon, _raportOsFizCedigName);
+                    if (BiRResponseXMLParser.IsResponseEmpty(result) || BiRResponseXMLParser.ContainsError(result))
                     {
-                        LogIn(false);
-                        result = _client.DanePobierzPelnyRaport(company.Regon, _raportOsFizCedigName);
-                        if (BiRResponseXMLParser.IsResponseEmpty(result) || BiRResponseXMLParser.ContainsError(result))
+                        errorCode = _client.GetValue(_codeOfMessageFromService);
+                        if (string.IsNullOrEmpty(errorCode) || errorCode.Equals(_errCodeForNoSession))
                         {
-                            errorCode = _client.GetValue(_codeOfMessageFromService);
+                            LogIn(false);
+                            result = _client.DanePobierzPelnyRaport(company.Regon, _raportOsFizCedigName);
+                            if (BiRResponseXMLParser.IsResponseEmpty(result) || BiRResponseXMLParser.ContainsError(result))
+                            {
+                                errorCode = _client.GetValue(_codeOfMessageFromService);
+                            }
+                        }
+                        if (!errorCode.Equals(_errCodeForEverythingOK))
+                        {
+                            _lastVerifyStatus = GetStatusFromErrorCode(errorCode, result);
+                            return null;
                         }
                     }
-                    if (!errorCode.Equals(_errCodeForEverythingOK))
-                    {
-                        _lastVerifyStatus = GetStatusFromErrorCode(errorCode, result);
-                        return null;
-                    }
+                    BiRResponseXMLParser.AddDaneFizycznaCedig(ref company, result);
                 }
-                BiRResponseXMLParser.AddDaneFizycznaCedig(ref company, result);
-            }
-            else
+                else
+                {
+                    // inaczej może być jeszcze LP i LF, czyli jednostek lokalnych
+                    throw new ArgumentOutOfRangeException(result, "Zapytanie zwróciło nieobsługiwany typ podmiotu tj. typ = " + company.Type + " , silos = " + company.SilosID);
+                }
+                return company;
+
+            } catch (Exception e)
             {
-                 // inaczej może być jeszcze LP i LF, czyli jednostek lokalnych
-                throw new ArgumentOutOfRangeException(result, "Zapytanie zwróciło nieobsługiwany typ podmiotu tj. typ = " + company.Type +" , silos = " + company.SilosID);
+
             }
 
-            
-
-
-            return company;
+            return null;
+           
         }
 
 

@@ -11,6 +11,7 @@
         private const string _serviceRequestErrorMsg = "Błąd zapytania do usługi zesnętrznej.";
         private const string _errorInClientSetUp = "Nie ustawiono połączenia z usługą.";
         private const string _errorUnknown = "Wystąpił nieznany błąd.";
+        private const string _errorDateNotCorrect = "Podana data weryfikacji jest nieporpawna lub pusta.";
     
 
         public static string GetMsg(VerifyNIPResult responseCode)
@@ -46,7 +47,9 @@
                 case VerifyNIPResult.Error:
                     msg = _errorUnknown;
                     break;
-              
+                case VerifyNIPResult.ErrorDateNotCorrect:
+                    msg = _errorDateNotCorrect;
+                    break;
                 default:
                     break;
             }

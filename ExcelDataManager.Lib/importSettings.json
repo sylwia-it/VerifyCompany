@@ -32,6 +32,10 @@
     {
       "ID": "NoteTitle",
       "HeaderText": "okres wyplaty"
+    },
+    {
+      "ID": "InvoiceDate",
+      "HeaderText": "data faktury"
     }
   ],
   "ExportStartLettersInHeader": "WER.",
@@ -74,11 +78,24 @@
     },
     {
       "ID": "FullWorkingAddressHeader",
-      "HeadrText": "WER. Adres wykonywania działalności"
+      "HeaderText": "WER. Adres wykonywania działalności"
     },
     {
       "ID": "AccountSeparateColHeaderStarter",
       "HeaderText": "WER. Konto"
+    },
+    {
+      "ID": "ImportFileError",
+      "HeaderText": "WER. Błąd w danych wejściowych"
+    },
+    {
+      "ID": "WhiteListVerificationForInvoiceDateStatusHeader",
+      "HeaderText": "WER. Biała Lista dla daty faktury"
+    },
+    {
+      "ID": "WhiteListVerificationForInvoiceDateConfirmAndDateHeader",
+      "HeaderText": "WER. Biała Lista dla daty faktury - data i ciąg potwierdzający"
     }
+
   ]
 }

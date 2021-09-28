@@ -25,7 +25,7 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         public void TestSingleCorrectCompany()
         {
             string nipToCheck = VerifyCompany.Common.Test.Lib.CompanyGenerator.GetCorrectNIP();
-            var a = _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult();
+            var a = _client.VerifyCompanies(nipToCheck, DateTime.Now).GetAwaiter().GetResult();
             Assert.IsNotNull(a.Result.RequestId);
             Assert.IsNotNull(a.Result.RequestDateTime);
             Assert.IsNotNull(a.Result.Entries);
@@ -40,7 +40,7 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         public void TestSingleInActiveCompany()
         {
             string nipToCheck = VerifyCompany.Common.Test.Lib.CompanyGenerator.GetZakonczoneUpadaloscioweNIP();
-            var a = _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult();
+            var a = _client.VerifyCompanies(nipToCheck, DateTime.Now).GetAwaiter().GetResult();
             Assert.IsNotNull(a.Result.RequestId);
             Assert.IsNotEmpty(a.Result.RequestId);
             Assert.IsNotNull(a.Result.RequestDateTime);
@@ -59,7 +59,7 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         {
             string nipToCheck = "1234567890";
 
-            var a = _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult();
+            var a = _client.VerifyCompanies(nipToCheck, DateTime.Now).GetAwaiter().GetResult();
             Assert.IsNotNull(a.Result.RequestId);
             Assert.IsNotEmpty(a.Result.RequestId);
             Assert.IsNotNull(a.Result.RequestDateTime);
@@ -77,7 +77,7 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         {
             string nipToCheck = string.Empty;
 
-            EntryListResponse eLR = _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult();
+            EntryListResponse eLR = _client.VerifyCompanies(nipToCheck, DateTime.Now).GetAwaiter().GetResult();
             Assert.IsTrue(DTHelper.IsItToday(eLR.Result.RequestDateTime));
             Assert.IsNotNull(eLR.Result.RequestId);
             Assert.IsNotEmpty(eLR.Result.RequestId);
@@ -91,7 +91,7 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         {
             string nipToCheck = "123";
 
-            EntryListResponse eLR = _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult();
+            EntryListResponse eLR = _client.VerifyCompanies(nipToCheck, DateTime.Now).GetAwaiter().GetResult();
             Assert.IsTrue(DTHelper.IsItToday(eLR.Result.RequestDateTime));
             Assert.IsNotNull(eLR.Result.RequestId);
             Assert.IsNotEmpty(eLR.Result.RequestId);
@@ -107,7 +107,7 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         {
             string nipToCheck = "123456789190";
 
-            EntryListResponse eLR = _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult();
+            EntryListResponse eLR = _client.VerifyCompanies(nipToCheck, DateTime.Now).GetAwaiter().GetResult();
             Assert.IsTrue(DTHelper.IsItToday(eLR.Result.RequestDateTime));
             Assert.IsNotNull(eLR.Result.RequestId);
             Assert.IsNotEmpty(eLR.Result.RequestId);
@@ -124,7 +124,7 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
 
             foreach (var nipToCheck in nipsToCheck)
             {
-                EntryListResponse eLR = _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult();
+                EntryListResponse eLR = _client.VerifyCompanies(nipToCheck, DateTime.Now).GetAwaiter().GetResult();
                 Assert.IsTrue(DTHelper.IsItToday(eLR.Result.RequestDateTime));
                 Assert.IsNotNull(eLR.Result.RequestId);
                 Assert.IsNotEmpty(eLR.Result.RequestId);
@@ -145,7 +145,7 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
 
             foreach (var nipToCheck in nipsToCheck)
             {
-                EntryListResponse eLR = _client.VerifyCompanies(nipToCheck).GetAwaiter().GetResult();
+                EntryListResponse eLR = _client.VerifyCompanies(nipToCheck, DateTime.Now).GetAwaiter().GetResult();
                 Assert.IsTrue(DTHelper.IsItToday(eLR.Result.RequestDateTime));
                 Assert.IsNotNull(eLR.Result.RequestId);
                 Assert.IsNotEmpty(eLR.Result.RequestId);

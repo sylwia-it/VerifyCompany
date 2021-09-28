@@ -13,7 +13,8 @@ namespace VerifyNIPAvtivePayer.Lib.Test
     {
         private NIPActivePayerVerifier _verifier;
         private List<string> _nipsToCheck = new List<string>();
-        
+        private WeryfikacjaVAT _prevClient;
+
         [OneTimeSetUp]
         public void Setup()
         {
@@ -40,7 +41,8 @@ namespace VerifyNIPAvtivePayer.Lib.Test
             _nipsToCheck.Add(CompanyGenerator.GetInCorrectNIP(4));
             clientMock.Setup(c => c.SprawdzNIP(It.Is<SprawdzNIPZapytanie>(z => z.NIP == CompanyGenerator.GetInCorrectNIP(0)))).Returns(new SprawdzNIPOdpowiedz() { WynikOperacji = new TWynikWeryfikacjiVAT() { Kod = TKodWeryfikacjiVAT.I } });
             _nipsToCheck.Add(CompanyGenerator.GetInCorrectNIP(0));
-
+            
+            _prevClient = WeryfikacjaVATClientFactory.GetWeryfikacjaVATClient();
 
             WeryfikacjaVATClientFactory.SetWeryfikacjaVATClinet(clientMock.Object);
             _verifier = new NIPActivePayerVerifier();
@@ -76,7 +78,11 @@ namespace VerifyNIPAvtivePayer.Lib.Test
             Assert.GreaterOrEqual((stopTime - startTime).TotalMilliseconds, 1000);
         }
 
-
+        [OneTimeTearDown]
+        public void TearDown()
+        {
+            WeryfikacjaVATClientFactory.SetWeryfikacjaVATClinet(_prevClient);
+        }
 
     }
 }

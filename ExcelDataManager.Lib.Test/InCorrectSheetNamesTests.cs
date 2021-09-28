@@ -19,12 +19,16 @@ namespace ExcelDataManager.Lib.Test
 
             fI = new FileInfo(_configFilePath);
             if (fI.Exists)
-                fI.CopyTo("importSettings.json", true);                
+            {
+                fI.CopyTo("importSettings.json", true);
+            }
             else
+            {
                 throw new FileLoadException("cannot load the input config");
+            }
             fI = new FileInfo(_filePath);
             if (fI.Exists)
-                _ssr = new SpreadSheetReader(fI.FullName, true);
+                _ssr = new SpreadSheetReader(fI.FullName, true, true);
             else
                 throw new FileLoadException("cannot load the input file");
 

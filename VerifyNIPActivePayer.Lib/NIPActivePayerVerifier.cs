@@ -34,6 +34,7 @@ namespace VerifyNIPActivePayer.Lib
 
             try
             {
+                
                 var response = client.SprawdzNIP(new SprawdzNIPZapytanie(nipToVerify));
                 return ConvertServiceResponseToResult(response.WynikOperacji);
 
@@ -44,16 +45,52 @@ namespace VerifyNIPActivePayer.Lib
             }
         }
 
-        public Dictionary<string, VerifyNIPResult> VerifyNIPs(List<Company> companiesToVerify)
+        public VerifyNIPResult VerifyNIP(string nipToVerify, DateTime date)
+        {
+
+            if (client == null)
+            {
+                return VerifyNIPResult.ErrorInClientSetUp;
+            }
+            if (string.IsNullOrEmpty(nipToVerify.Trim()))
+            {
+                return VerifyNIPResult.NIPNotCorrect;
+            }
+
+            if (DateTime.MinValue == date)
+            {
+                return VerifyNIPResult.ErrorDateNotCorrect;
+            }
+
+            try
+            {
+                var response = client.SprawdzNIPNaDzien(new SprawdzNIPNaDzienZapytanie(nipToVerify, date));
+                return ConvertServiceResponseToResult(response.WynikOperacji);
+
+            }
+            
+            catch (FaultException)
+            {
+                return VerifyNIPResult.Error;
+            }
+        }
+
+
+
+        public Dictionary<string, VerifyNIPResult> VerifyNIPs(List<InputCompany> companiesToVerify)
+        {
+            return VerifyNIPs(companiesToVerify, false);
+        }
+        public Dictionary<string, VerifyNIPResult> VerifyNIPs(List<InputCompany> companiesToVerify, bool verifyForInvoiceDay)
         {
             if (companiesToVerify == null)
             {
                 throw new ArgumentNullException("companiesToVerify", "companiesToVerify is null.");
             }
 
-           
+
             Dictionary<string, VerifyNIPResult> result = new Dictionary<string, VerifyNIPResult>();
-                       
+
 
             foreach (var company in companiesToVerify)
             {
@@ -61,7 +98,15 @@ namespace VerifyNIPActivePayer.Lib
                 {
                     throw new NullReferenceException("One element of the companiesToVerify is null.");
                 }
-                var verificationResult = VerifyNIP(company.NIP);
+                VerifyNIPResult verificationResult;
+                if (verifyForInvoiceDay)
+                {
+                    verificationResult = VerifyNIP(company.NIP, company.InvoiceDate);
+                }
+                else
+                {
+                    verificationResult = VerifyNIP(company.NIP);
+                }
                 result.Add(company.ID, verificationResult);
                 Thread.Sleep(100);
             }

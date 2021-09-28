@@ -58,21 +58,21 @@ namespace VerifyCompany.Common.Test.Lib
         private static List<string> _correctNIPs;
         private static List<string> _incorrectNIPs;
 
-        private static List<Company> _correctCompanies;
-        private static List<Company> _incorrectCompanies;
+        private static List<InputCompany> _correctCompanies;
+        private static List<InputCompany> _incorrectCompanies;
 
         public static Dictionary<string, string> CompaniesNIPIDDic { get; private set; }
-        private static Dictionary<string, Company> _correctPhisicalCompanyDic;
-        private static Dictionary<string, Company> _correctCompaniesDic;
+        private static Dictionary<string, InputCompany> _correctPhisicalCompanyDic;
+        private static Dictionary<string, InputCompany> _correctCompaniesDic;
 
         private static bool _isSetUp = false;
 
         protected CompanyGenerator() { }
 
         private static Random _random;
-        private static Dictionary<string, Company> _incorrectNipCompaniesDic;
+        private static Dictionary<string, InputCompany> _incorrectNipCompaniesDic;
 
-        public static Dictionary<string, Company> GetCorrectPhisicalCompanies()
+        public static Dictionary<string, InputCompany> GetCorrectPhisicalCompanies()
         {
             if (!_isSetUp)
             { SetUp(); }
@@ -117,7 +117,7 @@ namespace VerifyCompany.Common.Test.Lib
 
 
 
-        public static List<Company> GetAllCompanies()
+        public static List<InputCompany> GetAllCompanies()
         {
             if (!_isSetUp)
             { SetUp(); }
@@ -127,7 +127,7 @@ namespace VerifyCompany.Common.Test.Lib
 
 
 
-        public static Dictionary<string, Company> GetCorrectCompanies()
+        public static Dictionary<string, InputCompany> GetCorrectCompanies()
         {
             if (!_isSetUp)
             { SetUp(); }
@@ -135,7 +135,7 @@ namespace VerifyCompany.Common.Test.Lib
             return _correctCompaniesDic;
         }
 
-        public static Dictionary<string, Company> GetInCorrectNipCompanies()
+        public static Dictionary<string, InputCompany> GetInCorrectNipCompanies()
         {
             if (!_isSetUp)
             { SetUp(); }
@@ -152,51 +152,51 @@ namespace VerifyCompany.Common.Test.Lib
             _correctNIPs = new List<string>() { _correctNIP1, _correctNIP2, _correctNIP3, _correctNIP4, _correctNIP5, _correctNIP6, _correctNIP7, _correctNIP8, _correctNIP9, _correctNIP10, _correctNIP11};
             _incorrectNIPs = new List<string>() { _incorrectNIP1, _incorrectNIP2, _incorrectNIP3, _incorrectNIP4, _incorrectNIP5 };
 
-            _correctCompanies = new List<Company>()
-            {   new Company(){ NIP = _correctNIP1, ID = _correctID1, BankAccountNumber = "03124061751111001095041381" }, 
-                new Company(){ NIP = _correctNIP2, ID = _correctID2, BankAccountNumber = "24114011240000582620001003" },
-                new Company(){ NIP = _correctNIP3, ID = _correctID3, BankAccountNumber = "68160010841844744520000009" },
-                new Company(){ NIP = _correctNIP4, ID = _correctID4, BankAccountNumber = "27116022020000000109081086" },
-                new Company(){ NIP = _correctNIP5, ID = _correctID5, BankAccountNumber = "11114011240000584072001027" },
-                new Company(){ NIP = _correctNIP6, ID = _correctID6, BankAccountNumber = "64114020040000300278432279" },
-                new Company(){ NIP = _correctNIP7, ID = _correctID7, BankAccountNumber = "17124060031111000049409738" },
-                new Company(){ NIP = _correctNIP8, ID = _correctID8, BankAccountNumber = "67160011270003012765973021" },
-                new Company(){ NIP = _correctNIP9, ID = _correctID9, BankAccountNumber = "51124013301111001028688812" },
-                new Company(){ NIP = _correctNIP10, ID = _correctID10, BankAccountNumber = "31103015080000000500217065" },
-                new Company(){ NIP = _correctNIP11, ID = _correctID11, BankAccountNumber = "77160010130002001222057198" }
+            _correctCompanies = new List<InputCompany>()
+            {   new InputCompany(){ NIP = _correctNIP1, LP = _correctID1, RowNumber=1, BankAccountNumber = "03124061751111001095041381" }, 
+                new InputCompany(){ NIP = _correctNIP2, LP = _correctID2, RowNumber=2, BankAccountNumber = "24114011240000582620001003" },
+                new InputCompany(){ NIP = _correctNIP3, LP = _correctID3, RowNumber=3, BankAccountNumber = "68160010841844744520000009" },
+                new InputCompany(){ NIP = _correctNIP4, LP = _correctID4, RowNumber=4, BankAccountNumber = "27116022020000000109081086" },
+                new InputCompany(){ NIP = _correctNIP5, LP = _correctID5, RowNumber=5, BankAccountNumber = "11114011240000584072001027" },
+                new InputCompany(){ NIP = _correctNIP6, LP = _correctID6, RowNumber=6, BankAccountNumber = "64114020040000300278432279" },
+                new InputCompany(){ NIP = _correctNIP7, LP = _correctID7, RowNumber=7, BankAccountNumber = "17124060031111000049409738" },
+                new InputCompany(){ NIP = _correctNIP8, LP = _correctID8, RowNumber=8, BankAccountNumber = "67160011270003012765973021" },
+                new InputCompany(){ NIP = _correctNIP9, LP = _correctID9, RowNumber=9,  BankAccountNumber = "51124013301111001028688812" },
+                new InputCompany(){ NIP = _correctNIP10, LP = _correctID10, RowNumber=10, BankAccountNumber = "31103015080000000500217065" },
+                new InputCompany(){ NIP = _correctNIP11, LP = _correctID11, RowNumber=11, BankAccountNumber = "77160010130002001222057198" }
             };
 
-            _incorrectCompanies = new List<Company>()
+            _incorrectCompanies = new List<InputCompany>()
             { 
-                new Company(){ NIP = _incorrectNIP1, ID = _incorrectID1},
-                new Company(){ NIP = _incorrectNIP2, ID = _incorrectID2},
-                new Company(){ NIP = _incorrectNIP3, ID = _incorrectID3},
-                new Company(){ NIP = _incorrectNIP4, ID = _incorrectID4},
-                new Company(){ NIP = _incorrectNIP5, ID = _incorrectID5}
+                new InputCompany(){ NIP = _incorrectNIP1, LP = _incorrectID1, RowNumber=1 },
+                new InputCompany(){ NIP = _incorrectNIP2, LP = _incorrectID2, RowNumber=2 },
+                new InputCompany(){ NIP = _incorrectNIP3, LP = _incorrectID3, RowNumber=3 },
+                new InputCompany(){ NIP = _incorrectNIP4, LP = _incorrectID4, RowNumber=4 },
+                new InputCompany(){ NIP = _incorrectNIP5, LP = _incorrectID5, RowNumber=5 }
             };
 
             CompaniesNIPIDDic = new Dictionary<string, string>
             {
-                { _correctNIP1, _correctID1 },
-                { _correctNIP2, _correctID2 },
-                { _correctNIP3, _correctID3 },
-                { _correctNIP4, _correctID4 },
-                { _correctNIP5, _correctID5 },
-                { _correctNIP6, _correctID6 },
-                { _correctNIP7, _correctID7 },
-                { _correctNIP8, _correctID8 },
-                { _correctNIP9, _correctID9 },
-                { _correctNIP10, _correctID10 },
-                { _correctNIP11, _correctID11 },
+                { _correctNIP1, InputCompany.GetID(1, _correctID1, _correctNIP1) },
+                { _correctNIP2, InputCompany.GetID(2,_correctID2, _correctNIP2) },
+                { _correctNIP3, InputCompany.GetID(3,_correctID3, _correctNIP3) },
+                { _correctNIP4, InputCompany.GetID(4,_correctID4, _correctNIP4) },
+                { _correctNIP5, InputCompany.GetID(5,_correctID5, _correctNIP5) },
+                { _correctNIP6, InputCompany.GetID(6,_correctID6, _correctNIP6) },
+                { _correctNIP7, InputCompany.GetID(7,_correctID7, _correctNIP7) },
+                { _correctNIP8, InputCompany.GetID(8,_correctID8, _correctNIP8) },
+                { _correctNIP9, InputCompany.GetID(9,_correctID9, _correctNIP9) },
+                { _correctNIP10, InputCompany.GetID(10,_correctID10, _correctNIP10) },
+                { _correctNIP11, InputCompany.GetID(11, _correctID11, _correctNIP11) },
 
-                { _incorrectNIP1, _incorrectID1 },
-                { _incorrectNIP2, _incorrectID2 },
-                { _incorrectNIP3, _incorrectID3 },
-                { _incorrectNIP4, _incorrectID4 },
-                { _incorrectNIP5, _incorrectID5 }
+                { _incorrectNIP1, InputCompany.GetID(1,_incorrectID1, _incorrectNIP1) },
+                { _incorrectNIP2, InputCompany.GetID(2,_incorrectID2, _incorrectNIP2) },
+                { _incorrectNIP3, InputCompany.GetID(3,_incorrectID3, _incorrectNIP3) },
+                { _incorrectNIP4, InputCompany.GetID(4,_incorrectID4, _incorrectNIP4) },
+                { _incorrectNIP5, InputCompany.GetID(5,_incorrectID5, _incorrectNIP5) }
             };
 
-            _correctCompaniesDic = new Dictionary<string, Company>()
+            _correctCompaniesDic = new Dictionary<string, InputCompany>()
             {
                 { _correctCompanies[0].ID, _correctCompanies[0] },
                 { _correctCompanies[1].ID, _correctCompanies[1] },
@@ -213,7 +213,7 @@ namespace VerifyCompany.Common.Test.Lib
 
             };
 
-            _incorrectNipCompaniesDic = new Dictionary<string, Company>()
+            _incorrectNipCompaniesDic = new Dictionary<string, InputCompany>()
             {
                 { _incorrectCompanies[0].ID, _incorrectCompanies[0] },
                 { _incorrectCompanies[1].ID, _incorrectCompanies[1] },
@@ -223,10 +223,14 @@ namespace VerifyCompany.Common.Test.Lib
 
 
             };
-
-            _correctPhisicalCompanyDic = new Dictionary<string, Company>()
+            var phisicalC = new InputCompany()
             {
-                {_correctPhisicalCompanyID1, new Company(){NIP = _correctPhisicalCompanyNIP1} }
+                NIP = _correctPhisicalCompanyNIP1, LP = "1", RowNumber = 1
+            };
+            _correctPhisicalCompanyDic = new Dictionary<string, InputCompany>()
+            {
+                { phisicalC.ID, phisicalC }
+
             
             };
 

@@ -1,0 +1,26 @@
+﻿<Window x:Class="VerifyCompany.UI.AskToSelectScope"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VerifyCompany.UI"
+        mc:Ignorable="d"
+        Title="Wybierz zakres firm do sprawdzenia" Height="350" Width="530" WindowStartupLocation="CenterOwner">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Label Grid.Row="0" Background="Gray" Opacity="0.785" FontWeight="Bold" FontSize="14" >Wybierz zakres firm do sprawdzenia</Label>
+        <TextBlock Grid.Row="1" FontSize="13" TextWrapping="Wrap" >W podanym pliku jest więcej firm niż możliwe jest do sprawdzenia za jednym razem. Wybierz zakres firm, które chcesz sprawdzić.</TextBlock>
+        <ComboBox Grid.Row="2" x:Name="scopeCB" Width="250" Margin="0,50,0,0" FontSize="16"></ComboBox>
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="50,50,50,50" HorizontalAlignment="Center">
+            <Button Margin="0,0,50,0" Height="30" Width="100" Click="CancelButton_Click">Anuluj</Button>
+            <Button Height="30" Width="100" Click="OKButton_Click">Dalej</Button>
+        </StackPanel>
+        
+    </Grid>
+</Window>

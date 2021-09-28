@@ -9,7 +9,7 @@ namespace VerifyNIPAvtivePayer.Lib.Test
     public class SingleNipTestsMock
     {
         private NIPActivePayerVerifier _verifier;
-       
+        private WeryfikacjaVAT _prevClient;
 
         [OneTimeSetUp]
         public void Setup()
@@ -17,8 +17,8 @@ namespace VerifyNIPAvtivePayer.Lib.Test
             Mock<WeryfikacjaVAT> clientMock = new Mock<WeryfikacjaVAT>();
             clientMock.Setup(c => c.SprawdzNIP(It.Is<SprawdzNIPZapytanie>(z => z.NIP==CompanyGenerator.GetCorrectNIP(1)))).Returns(new SprawdzNIPOdpowiedz() { WynikOperacji = new TWynikWeryfikacjiVAT() { Kod = TKodWeryfikacjiVAT.C } });
             clientMock.Setup(c => c.SprawdzNIP(It.Is<SprawdzNIPZapytanie>(z => z.NIP == CompanyGenerator.GetInCorrectNIP(1)))).Returns(new SprawdzNIPOdpowiedz() { WynikOperacji = new TWynikWeryfikacjiVAT() { Kod = TKodWeryfikacjiVAT.I } });
-            
 
+            _prevClient = WeryfikacjaVATClientFactory.GetWeryfikacjaVATClient();
 
             WeryfikacjaVATClientFactory.SetWeryfikacjaVATClinet(clientMock.Object);
             _verifier = new NIPActivePayerVerifier();
@@ -59,6 +59,10 @@ namespace VerifyNIPAvtivePayer.Lib.Test
             Assert.AreEqual(VerifyNIPResult.NIPNotCorrect, response);
         }
 
-      
+      [OneTimeTearDown]
+        public void TearDown()
+        {
+            WeryfikacjaVATClientFactory.SetWeryfikacjaVATClinet(_prevClient);
+        }
     }
 }

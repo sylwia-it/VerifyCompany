@@ -19,7 +19,7 @@ namespace DocumentGenerator.Lib
         Application _app = null;
 
 
-        public void GenerateNotes(string outputPath, List<InputCompany> inputCompanies, Dictionary<string, WhiteListVerResult> verifiedCompanies)
+        public void GenerateNotes(string outputPath, List<InputCompany> inputCompanies, Dictionary<string, WhiteListVerResult> verifiedCompanies, bool createPDF)
         {
 
             try
@@ -28,6 +28,12 @@ namespace DocumentGenerator.Lib
                 {
                     _outputDirectoryInfo = new DirectoryInfo(string.Format("{0}\\Noty-{1}{2}{3}-{4}{5}", outputPath, DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute));
                     _outputDirectoryInfo.Create();
+                 
+                    if (createPDF)
+                    {
+                        DirectoryInfo pdfOutputDirectoryInfo = new DirectoryInfo(string.Format("{0}\\{1}", _outputDirectoryInfo.FullName, _pdfDirName));
+                        pdfOutputDirectoryInfo.Create();
+                    }
                 }
 
                 _app = new Application();
@@ -37,7 +43,7 @@ namespace DocumentGenerator.Lib
                     if (CanGenerateNotes(verifiedCompany.Value.VerificationStatus))
                     {
                         var inputCompany = inputCompanies.FirstOrDefault(c => c.ID == verifiedCompany.Key);
-                        CreateNote(inputCompany, verifiedCompany.Value, _outputDirectoryInfo.FullName);
+                        CreateNote(inputCompany, verifiedCompany.Value, _outputDirectoryInfo.FullName, createPDF);
                     }
                 }
 
@@ -58,7 +64,7 @@ namespace DocumentGenerator.Lib
         private const string _dot = ".";
         private Regex _fileNamePattern = new Regex("[a-zA-Z0-9_]{3,15}", RegexOptions.Compiled);
         private const int _lengthOfFullNameInFileNameWithNote = 15;
-        private void CreateNote(InputCompany inputCompany, WhiteListVerResult whiteListVerResult, string outputPath)
+        private void CreateNote(InputCompany inputCompany, WhiteListVerResult whiteListVerResult, string outputPath, bool createPDF)
         {
             string fileName = string.Empty;
             string templPath = string.Format("{0}\\{1}", Environment.CurrentDirectory, "templates\\NotaTemplate.xltx");
@@ -75,9 +81,17 @@ namespace DocumentGenerator.Lib
             fileName = fileName.Length > _lengthOfFullNameInFileNameWithNote ? fileName.Substring(0, _lengthOfFullNameInFileNameWithNote) : fileName;
 
             string noteID = _noteIDPattern.IsMatch(inputCompany.NoteID) ? _noteIDPattern.Match(inputCompany.NoteID).Value : string.Empty;
-            fileName = string.Format("{0}\\{1}-{2}.xlsx", outputPath, noteID, fileName);
 
-            _theWorkbook.SaveAs(fileName, XlFileFormat.xlWorkbookDefault, Type.Missing, Type.Missing, Type.Missing, Type.Missing, XlSaveAsAccessMode.xlNoChange, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
+            fileName = string.Format("{0}-{1}-{2}", inputCompany.RowNumber, noteID, fileName);
+
+            if (createPDF)
+            {
+                string pdfFilePath = string.Format("{0}\\{1}\\{2}.pdf", outputPath, _pdfDirName, fileName);
+                _theWorkbook.ExportAsFixedFormat2(XlFixedFormatType.xlTypePDF, pdfFilePath, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, false, Type.Missing, Type.Missing);
+            }
+
+            string xlsFilePath = string.Format("{0}\\{1}.xlsx", outputPath, fileName);
+            _theWorkbook.SaveAs(xlsFilePath, XlFileFormat.xlWorkbookDefault, Type.Missing, Type.Missing, Type.Missing, Type.Missing, XlSaveAsAccessMode.xlNoChange, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
             _theWorkbook.Close(true, Type.Missing, Type.Missing);
         }
 
@@ -107,6 +121,7 @@ namespace DocumentGenerator.Lib
             ((Range)worksheet.Cells[4, 9]).Formula = GetPaymentPeriod(inputCompany.NoteTitle);
 
             string fullNameWithAbbr = FormatHelper.AbbreviateFullNameOfCompany(whiteListVerResult.FullName);
+            fullNameWithAbbr = fullNameWithAbbr.Replace("\"", string.Empty);
             int numOfLinesForFullNames = 1 + (fullNameWithAbbr.Length / _maxLengthOfLineInFile);
 
             for (int j = 0; j < numOfLinesForFullNames; j++)
@@ -118,9 +133,9 @@ namespace DocumentGenerator.Lib
 
             string addressFull = string.IsNullOrEmpty(whiteListVerResult.FullResidenceAddress) ?
                     whiteListVerResult.FullWorkingAddress : whiteListVerResult.FullResidenceAddress;
-            addressFull = string.Concat(AddressHelper.GetStreetPrefix(addressFull), addressFull);
+            addressFull = string.Concat(AddressHelper.GetStreetPrefix(addressFull), _space , addressFull).Trim();
             addressFull = addressFull.Replace(_colon, string.Empty);
-            
+
 
             int addressDivIndex = _postalCodePattern.Match(addressFull).Index;
             ((Range)worksheet.Cells[8 + numOfLinesForFullNames, 8]).Formula = addressFull.Substring(0, addressDivIndex).Trim();
@@ -140,8 +155,8 @@ namespace DocumentGenerator.Lib
             ((Range)worksheet.Cells[36, 3]).Formula = NumberToWordsConverter.ConvertNumberToAmountPln((nettoAmount + vatAmout).ToString());
         }
 
-        
-        
+
+
 
         private const string q1Format = "01-01-{0} - 31-03-{0}";
         private const string q2Format = "01-04-{0} - 30-06-{0}";
@@ -149,6 +164,8 @@ namespace DocumentGenerator.Lib
         private const string q4Format = "01-10-{0} - 31-12-{0}";
         private Regex _qPattern = new Regex("Q[0-4]", RegexOptions.Compiled);
         private Regex _yearPattern = new Regex("20[0-9][0-9]", RegexOptions.Compiled);
+        private object _pdfDirName = "PDF";
+
         private string GetPaymentPeriod(string noteTile)
         {
 

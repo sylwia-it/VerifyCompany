@@ -1,9 +1,10 @@
 ﻿using System;
 
-namespace ExcelDataManager.Lib
+namespace ExcelDataManager.Lib.Import
 {
     public class SpreadSheetReaderException : Exception
     {
+        
         public SpreadSheetReaderException(string message, Exception innerException) : base(message, innerException)
         {
         }

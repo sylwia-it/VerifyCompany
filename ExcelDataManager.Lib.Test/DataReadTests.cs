@@ -4,6 +4,7 @@ using ExcelDataManager.Lib;
 using System.IO;
 using System;
 using VerifyCompany.Common.Lib;
+using System.Collections.Generic;
 
 namespace ExcelDataManager.Lib.Test
 {
@@ -25,7 +26,7 @@ namespace ExcelDataManager.Lib.Test
         {
             FileInfo fI = new FileInfo(_filePathCorrect);
             if (fI.Exists)
-                _ssr = new SpreadSheetReader(fI.FullName, true);
+                _ssr = new SpreadSheetReader(fI.FullName, true, false);
             else
                 throw new FileLoadException("cannot load the input file");
 
@@ -44,8 +45,9 @@ namespace ExcelDataManager.Lib.Test
             Assert.IsTrue(companies.Count == 5);
             InputCompany comp = companies[0];
             Assert.AreEqual("46124017501111001068892448", comp.BankAccountNumber);
-            Assert.AreEqual("1-7792369887", comp.ID);
+            Assert.AreEqual("5+1-7792369887", comp.ID);
             Assert.AreEqual("1", comp.LP);
+            Assert.AreEqual(5, comp.RowNumber);
             Assert.AreEqual("7792369887", comp.NIP);
             Assert.AreEqual("12.01.2019r.", comp.NoteDate);
             Assert.AreEqual("12", comp.NoteID);
@@ -60,7 +62,7 @@ namespace ExcelDataManager.Lib.Test
         {
             FileInfo fI = new FileInfo(_filePathCorrect);
             if (fI.Exists)
-                _ssr = new SpreadSheetReader(fI.FullName, false);
+                _ssr = new SpreadSheetReader(fI.FullName, false, false);
             else
                 throw new FileLoadException("cannot load the input file");
 
@@ -79,8 +81,9 @@ namespace ExcelDataManager.Lib.Test
             Assert.IsTrue(companies.Count == 5);
             InputCompany comp = companies[3];
             Assert.AreEqual("03124061751111001095041381", comp.BankAccountNumber);
-            Assert.AreEqual("4-7811767696", comp.ID);
+            Assert.AreEqual(InputCompany.GetID(8,"4", "7811767696"), comp.ID);
             Assert.AreEqual("4", comp.LP);
+            Assert.AreEqual(8, comp.RowNumber);
             Assert.AreEqual("7811767696", comp.NIP);
             Assert.IsNull(comp.NoteDate);
             Assert.IsNull(comp.NoteID);
@@ -95,12 +98,14 @@ namespace ExcelDataManager.Lib.Test
         {
             FileInfo fI = new FileInfo(_filePathBankAccountTooShort);
             if (fI.Exists)
-                _ssr = new SpreadSheetReader(fI.FullName, true);
+                _ssr = new SpreadSheetReader(fI.FullName, true, false);
             else
                 throw new FileLoadException("cannot load the input file");
 
-            SpreadSheetReaderException e = Assert.Throws<SpreadSheetReaderException>(() => _ssr.ReadDataFromFile());
-            Assert.IsTrue(e.InnerException.Message.Contains("nie spe³nia wymogów konta"));
+            InputCompany firstInputCompanies = _ssr.ReadDataFromFile()[0];
+
+            Assert.AreEqual(InputCompanyFormatError.BankAccountFormatError, firstInputCompanies.FormatErrors[0]);
+
         }
 
         [Test]
@@ -108,12 +113,13 @@ namespace ExcelDataManager.Lib.Test
         {
             FileInfo fI = new FileInfo(_filePathBankAccountWithLetters);
             if (fI.Exists)
-                _ssr = new SpreadSheetReader(fI.FullName, true);
+                _ssr = new SpreadSheetReader(fI.FullName, true, false);
             else
                 throw new FileLoadException("cannot load the input file");
 
-            SpreadSheetReaderException e = Assert.Throws<SpreadSheetReaderException>(() => _ssr.ReadDataFromFile());
-            Assert.IsTrue(e.InnerException.Message.Contains("nie spe³nia wymogów konta"));
+            InputCompany firstInputCompanies = _ssr.ReadDataFromFile()[0];
+
+            Assert.AreEqual(InputCompanyFormatError.BankAccountFormatError, firstInputCompanies.FormatErrors[0]);
         }
 
         [Test]
@@ -121,12 +127,13 @@ namespace ExcelDataManager.Lib.Test
         {
             FileInfo fI = new FileInfo(_filePathNipTooShort);
             if (fI.Exists)
-                _ssr = new SpreadSheetReader(fI.FullName, true);
+                _ssr = new SpreadSheetReader(fI.FullName, true, false);
             else
                 throw new FileLoadException("cannot load the input file");
 
-            SpreadSheetReaderException e = Assert.Throws<SpreadSheetReaderException>(() => _ssr.ReadDataFromFile());
-            Assert.IsTrue(e.InnerException.Message.Contains("nie jest poprawny"));
+            InputCompany firstInputCompanies = _ssr.ReadDataFromFile()[0];
+
+            Assert.AreEqual(InputCompanyFormatError.NIPFormatError, firstInputCompanies.FormatErrors[0]);
         }
 
         [Test]
@@ -134,12 +141,13 @@ namespace ExcelDataManager.Lib.Test
         {
             FileInfo fI = new FileInfo(_filePathNipWithLetter);
             if (fI.Exists)
-                _ssr = new SpreadSheetReader(fI.FullName, true);
+                _ssr = new SpreadSheetReader(fI.FullName, true, false);
             else
                 throw new FileLoadException("cannot load the input file");
 
-            SpreadSheetReaderException e = Assert.Throws<SpreadSheetReaderException>(() => _ssr.ReadDataFromFile());
-            Assert.IsTrue(e.InnerException.Message.Contains("nie jest poprawny"));
+            InputCompany firstInputCompanies = _ssr.ReadDataFromFile()[0];
+
+            Assert.AreEqual(InputCompanyFormatError.NIPFormatError, firstInputCompanies.FormatErrors[0]);
         }
 
         [Test]
@@ -147,12 +155,13 @@ namespace ExcelDataManager.Lib.Test
         {
             FileInfo fI = new FileInfo(_filePathNipInCorrect);
             if (fI.Exists)
-                _ssr = new SpreadSheetReader(fI.FullName, true);
+                _ssr = new SpreadSheetReader(fI.FullName, true, false);
             else
                 throw new FileLoadException("cannot load the input file");
 
-            SpreadSheetReaderException e = Assert.Throws<SpreadSheetReaderException>(() => _ssr.ReadDataFromFile());
-            Assert.IsTrue(e.InnerException.Message.Contains("nie jest poprawny"));
+            InputCompany firstInputCompanies = _ssr.ReadDataFromFile()[0];
+
+            Assert.AreEqual(InputCompanyFormatError.NIPFormatError, firstInputCompanies.FormatErrors[0]);
         }
 
 

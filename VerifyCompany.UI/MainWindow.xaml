@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VerifyCompany.UI"
         mc:Ignorable="d" 
-        Title="Sprawdź firmy" Height="850" Width="800" Icon="img/Icon.ico" WindowStartupLocation="CenterScreen">
+        Title="Sprawdź firmy" Height="900" Width="800" Icon="img/Icon.ico" WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <Style x:Key="InstructionLabelStyle" TargetType="Label">
             <Setter Property="Background" Value="LightGray"></Setter>
@@ -61,7 +61,16 @@
                     </CheckBox.LayoutTransform>
                 </CheckBox>
                 </StackPanel>
+               
             </Expander>
+            <CheckBox x:Name="checkForInvoiceDateCB"  VerticalContentAlignment="Top" Margin="20,3,0,3" FontSize="12">
+                <CheckBox.Content>
+                    <TextBlock TextWrapping="Wrap">Sprawdzaj firmę też dla dzień daty faktury</TextBlock>
+                </CheckBox.Content>
+                <CheckBox.LayoutTransform>
+                    <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
+                </CheckBox.LayoutTransform>
+            </CheckBox>
         </StackPanel>
        
         <StackPanel Grid.Row="3" Margin="0,0,0,10">
@@ -87,6 +96,7 @@
                 </CheckBox.Content>
             </CheckBox>
             <CheckBox x:Name="generateNotesCB"  VerticalContentAlignment="Top" Margin="20,3,0,3" FontSize="12">
+                
                 <CheckBox.LayoutTransform>
                     <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
                 </CheckBox.LayoutTransform>
@@ -94,14 +104,22 @@
                     <TextBlock TextWrapping="Wrap">Generuj noty</TextBlock>
                 </CheckBox.Content>
             </CheckBox>
+            <CheckBox x:Name="exportToPDFCB" IsEnabled="{Binding ElementName=generateNotesCB, Path=IsChecked}"  VerticalContentAlignment="Top" Margin="20,3,0,3" FontSize="12">
+                <CheckBox.LayoutTransform>
+                    <ScaleTransform ScaleX="1.3" ScaleY="1.3"/>
+                </CheckBox.LayoutTransform>
+                <CheckBox.Content>
+                    <TextBlock TextWrapping="Wrap">Eksportuj noty do PDF</TextBlock>
+                </CheckBox.Content>
+            </CheckBox>
         </StackPanel>
 
         <StackPanel Grid.Row="6" Margin="0,0,0,10">
             <Label  Style="{StaticResource InstructionLabelStyle}" >Wybierz plik:</Label>
-            <Button x:Name="selectFileBtn" Click="selectFileBtn_Click" Height="50" Width="150" HorizontalAlignment="Left" Margin="50,10,10,10">Wybierz plik i sprawdź</Button>
+            <Button x:Name="selectFileBtn" Click="SelectFileBtn_Click" Height="50" Width="150" HorizontalAlignment="Left" Margin="50,10,10,10">Wybierz plik i sprawdź</Button>
         </StackPanel>
         <Label Grid.Row="7" Style="{StaticResource InstructionLabelStyle}" >Rezultaty:</Label>
-        <TextBox Grid.Row="8" x:Name="resultTBl" IsManipulationEnabled="True" IsReadOnly="True" VerticalScrollBarVisibility="Auto"></TextBox>
-        <Button Grid.Row="9" x:Name="printBtn" Visibility="Hidden" Height="40" Width="100" HorizontalAlignment="Right" Margin="0,10,15,10">Drukuj Rezultaty</Button>
+        <TextBox Grid.Row="8" x:Name="resultTBl" IsManipulationEnabled="True" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"></TextBox>
+        <Button Grid.Row="9" x:Name="printBtn" Click="PrintBtn_Click" Visibility="Hidden" Height="40" Width="100" HorizontalAlignment="Right" Margin="0,10,15,10">Drukuj Błędy</Button>
     </Grid> 
 </Window>

@@ -39,7 +39,10 @@
         /// Uknown error.
         /// </summary>
         Error,
-        
+        /// <summary>
+        /// Input Data, for which the verification shall be run is not correct
+        /// </summary>
+        ErrorDateNotCorrect,
     }
 
     public static class Extentions

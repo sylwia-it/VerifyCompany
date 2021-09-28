@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;net472</TargetFrameworks>
+    <TargetFrameworks>net5.0;net48</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,6 +26,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\VerifyActiveCompany.Lib\VerifyActiveCompany.Lib.csproj" />
+    <ProjectReference Include="..\VerifyCompany.Common.Lib\VerifyCompany.Common.Lib.csproj" />
+    <ProjectReference Include="..\VerifyNIPActivePayer.Lib\VerifyNIPActivePayer.Lib.csproj" />
     <ProjectReference Include="..\VerifyWhiteListCompany.Lib\VerifyWhiteListCompany.Lib.csproj" />
   </ItemGroup>
 
@@ -33,18 +35,6 @@
     <None Update="importSettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="VerifyCompany.Common.Lib">
-      <HintPath>..\VerifyCompany.Common.Lib\bin\$(Configuration)\netcoreapp3.1\VerifyCompany.Common.Lib.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="VerifyNIPActivePayer.Lib">
-      <HintPath>..\VerifyNIPActivePayer.Lib\bin\$(Configuration)\netcoreapp3.1\VerifyNIPActivePayer.Lib.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

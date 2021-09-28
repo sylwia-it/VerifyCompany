@@ -1,14 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net5.0;net472</TargetFrameworks>
   </PropertyGroup>
 
- 
   <ItemGroup>
-    <Reference Include="VerifyCompany.Common.Lib">
-      <HintPath>..\VerifyCompany.Common.Lib\bin\$(Configuration)\netcoreapp3.1\VerifyCompany.Common.Lib.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\VerifyCompany.Common.Lib\VerifyCompany.Common.Lib.csproj" />
   </ItemGroup>
 
 </Project>

@@ -33,7 +33,7 @@ namespace VerifyWhiteListCompany.Lib
         /// </summary>
         /// <param name="nips">Comma separted Nips</param>
         /// <returns></returns>
-        public async Task<EntryListResponse> VerifyCompanies(string nips)
+        public async Task<EntryListResponse> VerifyCompanies(string nips, DateTime date)
         {
             string currentDate = DateTime.Now.ToString(_dateFormat);
             EntryListResponse entities = null;

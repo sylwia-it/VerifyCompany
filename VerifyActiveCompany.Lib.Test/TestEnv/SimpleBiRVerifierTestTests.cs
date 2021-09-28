@@ -37,8 +37,8 @@ namespace VerifyActiveCompany.Lib.Test.TestEnv
         [Test]
         public void CorrectNips()
         {
-            Dictionary<string, Company> correctCompanies = CompanyGenerator.GetCorrectCompanies();
-            Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(correctCompanies);
+            Dictionary<string, InputCompany> correctCompanies = CompanyGenerator.GetCorrectCompanies();
+            Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(correctCompanies.Values.ToList<InputCompany>());
 
             Assert.AreEqual(correctCompanies.Count, verResults.Count);
             Assert.AreEqual(0, correctCompanies.Keys.Except(verResults.Keys).Count());
@@ -55,7 +55,7 @@ namespace VerifyActiveCompany.Lib.Test.TestEnv
         [Test]
         public void EmptyInput()
         {
-            Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(new Dictionary<string, Company>());
+            Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(new List<InputCompany>());
             Assert.IsNull(verResults);
         }
 
@@ -69,8 +69,8 @@ namespace VerifyActiveCompany.Lib.Test.TestEnv
         [Test]
         public void InCorrectNipInput()
         {
-            Dictionary<string, Company> incorrectCompanies = CompanyGenerator.GetInCorrectNipCompanies();
-            Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(incorrectCompanies);
+            Dictionary<string, InputCompany> incorrectCompanies = CompanyGenerator.GetInCorrectNipCompanies();
+            Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(incorrectCompanies.Values.ToList<InputCompany>());
 
             Assert.AreEqual(incorrectCompanies.Count, verResults.Count);
             Assert.AreEqual(0, incorrectCompanies.Keys.Except(verResults.Keys).Count());
@@ -83,11 +83,11 @@ namespace VerifyActiveCompany.Lib.Test.TestEnv
         }
 
         [Test]
-        public void NullAndEmptyNipInput()
+        public void EmptyNipInput()
         {
-            Dictionary<string, Company> companies = new Dictionary<string, Company>();
-            companies.Add("def", new Company() { NIP = string.Empty });
-            companies.Add("ghi", new Company() { NIP = null });
+            List<InputCompany> companies = new List< InputCompany>();
+            companies.Add( new InputCompany() { NIP = string.Empty });
+            
             Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(companies);
 
 
@@ -100,8 +100,8 @@ namespace VerifyActiveCompany.Lib.Test.TestEnv
         [Test]
         public void NullCompanyInput()
         {
-            Dictionary<string, Company> companies = new Dictionary<string, Company>();
-            companies.Add("abc", null);
+            List<InputCompany> companies = new List<InputCompany>();
+            companies.Add(null);
             Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(companies);
 
             foreach (var verResult in verResults)

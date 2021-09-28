@@ -25,11 +25,14 @@ namespace VerifyActiveCompany.Lib.Test
             _verifier.Finish();
         }
 
+
+
+
         [Test]
         public void CorrectNipsPrawna()
         {
-            Dictionary<string, Company> correctCompanies = CompanyGenerator.GetCorrectCompanies();
-            Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(correctCompanies);
+            Dictionary<string, InputCompany> correctCompanies = CompanyGenerator.GetCorrectCompanies();
+            Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(correctCompanies.Values.ToList<InputCompany>());
 
             Assert.AreEqual(correctCompanies.Count, verResults.Count);
             Assert.AreEqual(0, correctCompanies.Keys.Except(verResults.Keys).Count());
@@ -42,10 +45,36 @@ namespace VerifyActiveCompany.Lib.Test
         }
 
         [Test]
+        public void CorrectNipsPrawnaMulitiple()
+        {
+            Dictionary<string, InputCompany> correctCompanies = CompanyGenerator.GetCorrectCompanies();
+            var correctC = correctCompanies.Values.ToList();
+            for (int i = 0; i < correctC.Count(); i++)
+            {
+                var c = correctC[i];
+                InputCompany tempCompany = new InputCompany() { RowNumber= c.RowNumber+20, NIP = c.NIP, LP = c.LP};
+                correctCompanies.Add(tempCompany.ID, tempCompany);
+                tempCompany = new InputCompany() { RowNumber = c.RowNumber + 120, NIP = c.NIP, LP = c.LP };
+                correctCompanies.Add(tempCompany.ID, tempCompany);
+            }
+
+            Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(correctCompanies.Values.ToList<InputCompany>());
+
+            Assert.AreEqual(correctCompanies.Count, verResults.Count);
+            Assert.AreEqual(0, correctCompanies.Keys.Except(verResults.Keys).Count());
+
+
+            foreach (var result in verResults)
+            {
+                Assert.AreEqual(BiRVerifyStatus.IsActive, result.Value.BiRVerifyStatus);
+            }
+        }
+
+        [Test]
         public void CorrectNipsFizyczna()
         {
-            Dictionary<string, Company> correctCompanies = CompanyGenerator.GetCorrectPhisicalCompanies();
-            Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(correctCompanies);
+            Dictionary<string, InputCompany> correctCompanies = CompanyGenerator.GetCorrectPhisicalCompanies();
+            Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(correctCompanies.Values.ToList<InputCompany>());
 
             Assert.AreEqual(correctCompanies.Count, verResults.Count);
             Assert.AreEqual(0, correctCompanies.Keys.Except(verResults.Keys).Count());
@@ -60,8 +89,8 @@ namespace VerifyActiveCompany.Lib.Test
         [Test]
         public void InActiveCompanyTest()
         {
-            Dictionary<string, Company> inActiveCompanies = InActiveCompanyGeneratorForProdDB.GetInActiveCompanies();
-            Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(inActiveCompanies);
+            Dictionary<string, InputCompany> inActiveCompanies = InActiveCompanyGeneratorForProdDB.GetInActiveCompanies();
+            Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(inActiveCompanies.Values.ToList<InputCompany>());
 
             Assert.AreEqual(inActiveCompanies.Count, verResults.Count);
             Assert.AreEqual(0, inActiveCompanies.Keys.Except(verResults.Keys).Count());
@@ -77,7 +106,7 @@ namespace VerifyActiveCompany.Lib.Test
         [Test]
         public void EmptyInput()
         {
-            Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(new Dictionary<string, Company>());
+            Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(new List<InputCompany>());
             Assert.IsNull(verResults);
         }
 
@@ -91,8 +120,8 @@ namespace VerifyActiveCompany.Lib.Test
         [Test]
         public void InCorrectNipInput()
         {
-            Dictionary<string, Company> incorrectCompanies = CompanyGenerator.GetInCorrectNipCompanies();
-            Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(incorrectCompanies);
+            Dictionary<string, InputCompany> incorrectCompanies = CompanyGenerator.GetInCorrectNipCompanies();
+            Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(incorrectCompanies.Values.ToList<InputCompany>());
 
             Assert.AreEqual(incorrectCompanies.Count, verResults.Count);
             Assert.AreEqual(0, incorrectCompanies.Keys.Except(verResults.Keys).Count());
@@ -107,9 +136,8 @@ namespace VerifyActiveCompany.Lib.Test
         [Test]
         public void NullAndEmptyNipInput()
         {
-            Dictionary<string, Company> companies = new Dictionary<string, Company>();
-            companies.Add("def", new Company() { NIP = string.Empty });
-            companies.Add("ghi", new Company() { NIP = null});
+            List<InputCompany> companies = new List<InputCompany>();
+            companies.Add( new InputCompany() { NIP = string.Empty });
             Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(companies);
 
 
@@ -122,14 +150,12 @@ namespace VerifyActiveCompany.Lib.Test
         [Test]
         public void NullCompanyInput()
         {
-            Dictionary<string, Company> companies = new Dictionary<string, Company>();
-            companies.Add("abc", null);
+            List<InputCompany> companies = new List<InputCompany>();
+            companies.Add(null);
             Dictionary<string, BiRVerifyResult> verResults = _verifier.AreCompaniesActive(companies);
 
-            foreach (var verResult in verResults)
-            {
-                Assert.AreEqual(BiRVerifyStatus.CompanyIsNull, verResult.Value.BiRVerifyStatus);
-            }
+           Assert.AreEqual(0, verResults.Count());
+            
         }
     }
 }

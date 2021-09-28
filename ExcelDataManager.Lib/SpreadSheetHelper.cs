@@ -20,9 +20,9 @@ namespace ExcelDataManager.Lib
             return false;
         }
 
-        public static int FindHeaderRow(Worksheet worksheet, List<ColumnConfig> columnsConfig)
+        public static int FindHeaderRow(Worksheet worksheet, List<ColumnConfig> importColumnsConfig)
         {
-            string nipHeaderCaption = columnsConfig.FirstOrDefault(c => c.ID.Contains(ImportColumnName.NIP.ToString().ToLower())).HeaderText;
+            string nipHeaderCaption = importColumnsConfig.FirstOrDefault(c => c.ID.ToLower().Contains(ImportColumnName.NIP.ToString().ToLower())).HeaderText;
 
             //Recognize the header row by looking for them in the first 75 columns and first 10 rows
             for (int row = 1; row <= 10; row++)

@@ -39,7 +39,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="input\spispna.csv">
+    <None Update="Input\spispna.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Templates\NotaTemplate.xltx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

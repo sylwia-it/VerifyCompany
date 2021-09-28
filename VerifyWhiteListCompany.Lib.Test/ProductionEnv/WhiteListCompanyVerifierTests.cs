@@ -38,7 +38,7 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         {
             var companiesToCheck = VerifyCompany.Common.Test.Lib.CompanyGenerator.GetCorrectCompanies();
 
-            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(companiesToCheck.Values.ToList<Company>(), false);
+            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(companiesToCheck.Values.ToList<InputCompany>(), false, false);
             Logger.Info("Starts");
 
             foreach (var companyToCheck in companiesToCheck)
@@ -59,7 +59,7 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         {
             var companiesToCheck = VerifyCompany.Common.Test.Lib.CompanyGenerator.GetCorrectCompanies();
 
-            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(companiesToCheck.Values.Take(1).ToList<Company>(), false);
+            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(companiesToCheck.Values.Take(1).ToList<InputCompany>(), false, false);
             
 
             foreach (var companyToCheck in companiesToCheck.Take(1))
@@ -78,18 +78,18 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         [Test]
         public void TestNullInputCompaniesTest()
         {
-            Assert.Throws<ArgumentNullException>(() => _verifier.VerifyCompanies(null, false));
-            Assert.Throws<ArgumentNullException>(() => _verifier.VerifyCompanies(null, true));
+            Assert.Throws<ArgumentNullException>(() => _verifier.VerifyCompanies(null, false, false));
+            Assert.Throws<ArgumentNullException>(() => _verifier.VerifyCompanies(null, true, false));
         }
 
         [Test]
         public void TestEmptyInputCompaies()
         {
-            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(new List<Company>(), false);
+            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(new List<InputCompany>(), false, false);
             Assert.IsNotNull(verResults);
             Assert.AreEqual(0, verResults.Count);
 
-            verResults = _verifier.VerifyCompanies(new List<Company>(), true);
+            verResults = _verifier.VerifyCompanies(new List<InputCompany>(), true, false);
             Assert.IsNotNull(verResults);
             Assert.AreEqual(0, verResults.Count);
         }
@@ -99,7 +99,7 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         {
             var companiesToCheck = VerifyCompany.Common.Test.Lib.CompanyGenerator.GetCorrectCompanies();
 
-            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(companiesToCheck.Values.ToList<Company>(), true);
+            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(companiesToCheck.Values.ToList<InputCompany>(), true, false);
 
 
             foreach (var companyToCheck in companiesToCheck)
@@ -118,30 +118,30 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         [Test]
         public void TestCorrectCompaniesWithInCorrectBankAccounts()
         {
-            var companiesToCheck = new Dictionary<string, Company>(CompanyGenerator.GetCorrectCompanies());
+            var companiesToCheck = new Dictionary<string, InputCompany>(CompanyGenerator.GetCorrectCompanies());
             //0 - z³y account number, nie na liœcie
-            Company tempComp = companiesToCheck.ElementAt(0).Value;
+            InputCompany tempComp = companiesToCheck.ElementAt(0).Value;
             companiesToCheck.Remove(companiesToCheck.ElementAt(0).Key);
-            companiesToCheck.Add(tempComp.ID, new Company() { ID = new string(tempComp.ID), BankAccountNumber = new string(tempComp.BankAccountNumber), NIP = new string(tempComp.NIP)});
+            companiesToCheck.Add(tempComp.ID, new InputCompany() { LP = tempComp.LP, BankAccountNumber = new string(tempComp.BankAccountNumber), NIP = tempComp.NIP, RowNumber= tempComp.RowNumber});
             string notOnWhiteListAccountNumberID = tempComp.ID;
 
             //1- z literk¹ account number
             tempComp = companiesToCheck.ElementAt(1).Value;
             companiesToCheck.Remove(companiesToCheck.ElementAt(1).Key);
-            companiesToCheck.Add(tempComp.ID, new Company() { ID = new string(tempComp.ID), BankAccountNumber = new string(tempComp.BankAccountNumber).Remove(5, 2).Insert(4, "ab"), NIP = new string(tempComp.NIP) });
+            companiesToCheck.Add(tempComp.ID, new InputCompany() { LP = tempComp.LP, BankAccountNumber = new string(tempComp.BankAccountNumber).Remove(5, 2).Insert(4, "ab"), NIP = new string(tempComp.NIP), RowNumber = tempComp.RowNumber });
             companiesToCheck[notOnWhiteListAccountNumberID].BankAccountNumber = tempComp.BankAccountNumber;
 
             //2 - pusty account number
             tempComp = companiesToCheck.ElementAt(2).Value;
             companiesToCheck.Remove(companiesToCheck.ElementAt(2).Key);
-            companiesToCheck.Add(tempComp.ID, new Company() { ID = new string(tempComp.ID), BankAccountNumber = string.Empty, NIP = new string(tempComp.NIP) });
+            companiesToCheck.Add(tempComp.ID, new InputCompany() { LP = tempComp.LP, BankAccountNumber = string.Empty, NIP = new string(tempComp.NIP), RowNumber = tempComp.RowNumber });
 
             //3 - null account number
             tempComp = companiesToCheck.ElementAt(3).Value;
             companiesToCheck.Remove(companiesToCheck.ElementAt(3).Key);
-            companiesToCheck.Add(tempComp.ID, new Company() { ID = new string(tempComp.ID), BankAccountNumber = null, NIP = new string(tempComp.NIP) });
+            companiesToCheck.Add(tempComp.ID, new InputCompany() { LP = tempComp.LP, BankAccountNumber = null, NIP = new string(tempComp.NIP), RowNumber = tempComp.RowNumber });
 
-            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(companiesToCheck.Values.ToList<Company>(), true);
+            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(companiesToCheck.Values.ToList<InputCompany>(), true, false);
 
             KeyValuePair<string, WhiteListVerResult> companyChecked = verResults.FirstOrDefault(vr => vr.Key == companiesToCheck.ElementAt(0).Key);
             Assert.IsNotNull(companyChecked);
@@ -180,21 +180,21 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         [Test]
         public void TestOneInCorrectNIPCompany()
         {
-            var companiesToCheck = new Dictionary<string, Company>(CompanyGenerator.GetCorrectCompanies());
+            var companiesToCheck = new Dictionary<string, InputCompany>(CompanyGenerator.GetCorrectCompanies());
             var incorrectCompany = VerifyCompany.Common.Test.Lib.CompanyGenerator.GetInCorrectNipCompanies();
 
             //add incorrect company
-            companiesToCheck.Add(incorrectCompany.ElementAt(0).Key, incorrectCompany.ElementAt(0).Value);
+            companiesToCheck.Add(incorrectCompany.ElementAt(0).Value.ID, incorrectCompany.ElementAt(0).Value);
 
 
-            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(companiesToCheck.Values.ToList<Company>(), true);
+            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(companiesToCheck.Values.ToList<InputCompany>(), true, false);
 
-            var companyIncorrectNipChecked = verResults.FirstOrDefault(vr => vr.Key == incorrectCompany.ElementAt(0).Key);
+            var companyIncorrectNipChecked = verResults.FirstOrDefault(vr => vr.Key == incorrectCompany.ElementAt(0).Value.ID);
             Assert.IsNotNull(companyIncorrectNipChecked);
             Assert.AreEqual(WhiteListVerResultStatus.ErrorNIPError, companyIncorrectNipChecked.Value.VerificationStatus);
             Assert.IsTrue(DTHelper.IsItToday(companyIncorrectNipChecked.Value.VerificationDate));
 
-            foreach (var companyToCheck in companiesToCheck.Where(c=>c.Key != incorrectCompany.ElementAt(0).Key))
+            foreach (var companyToCheck in companiesToCheck.Where(c=>c.Key != incorrectCompany.ElementAt(0).Value.ID))
             {
                 var companyChecked = verResults.FirstOrDefault(vr => vr.Key == companyToCheck.Key);
                 Assert.IsNotNull(companyChecked);
@@ -206,22 +206,22 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         [Test]
         public void TestTwoInCorrectNIPCompany()
         {
-            var companiesToCheck = new Dictionary<string, Company>(CompanyGenerator.GetCorrectCompanies());
+            var companiesToCheck = new Dictionary<string, InputCompany>(CompanyGenerator.GetCorrectCompanies());
             var incorrectCompany = VerifyCompany.Common.Test.Lib.CompanyGenerator.GetInCorrectNipCompanies();
 
             //add incorrect company
-            companiesToCheck.Add(incorrectCompany.ElementAt(0).Key, incorrectCompany.ElementAt(0).Value);
-            companiesToCheck.Add(incorrectCompany.ElementAt(2).Key, incorrectCompany.ElementAt(2).Value);
+            companiesToCheck.Add(incorrectCompany.ElementAt(0).Value.ID, incorrectCompany.ElementAt(0).Value);
+            companiesToCheck.Add(incorrectCompany.ElementAt(2).Value.ID, incorrectCompany.ElementAt(2).Value);
 
 
-            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(companiesToCheck.Values.ToList<Company>(),  true);
+            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(companiesToCheck.Values.ToList<InputCompany>(),  true, false);
 
-            var companyIncorrectNipChecked = verResults.FirstOrDefault(vr => vr.Key == incorrectCompany.ElementAt(0).Key);
+            var companyIncorrectNipChecked = verResults.FirstOrDefault(vr => vr.Key == incorrectCompany.ElementAt(0).Value.ID);
             Assert.IsNotNull(companyIncorrectNipChecked);
             Assert.AreEqual(WhiteListVerResultStatus.ErrorNIPError, companyIncorrectNipChecked.Value.VerificationStatus);
             Assert.IsTrue(DTHelper.IsItToday(companyIncorrectNipChecked.Value.VerificationDate));
 
-            foreach (var companyToCheck in companiesToCheck.Where(c => c.Key != incorrectCompany.ElementAt(0).Key && c.Key != incorrectCompany.ElementAt(2).Key))
+            foreach (var companyToCheck in companiesToCheck.Where(c => c.Key != incorrectCompany.ElementAt(0).Value.ID && c.Key != incorrectCompany.ElementAt(2).Value.ID))
             {
                 var companyChecked = verResults.FirstOrDefault(vr => vr.Key == companyToCheck.Key);
                 Assert.IsNotNull(companyChecked);
@@ -236,27 +236,24 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         [Test]
         public void TestEmptyNIPCompanyWithCorrectCompanies()
         {
-            var companiesToCheck = new Dictionary<string, Company>(VerifyCompany.Common.Test.Lib.CompanyGenerator.GetCorrectCompanies());
+            var companiesToCheck = new Dictionary<string, InputCompany>(VerifyCompany.Common.Test.Lib.CompanyGenerator.GetCorrectCompanies());
 
             //add incorrect company
             const string emptyNIPCompanyID = "emptyNip";
-            companiesToCheck.Add(emptyNIPCompanyID, new Company() { ID = emptyNIPCompanyID, NIP=string.Empty});
-            const string nullNipCompanyID = "nullNip";
-            companiesToCheck.Add(nullNipCompanyID, new Company() { ID = nullNipCompanyID, NIP = null });
+            InputCompany emptyCompany = new InputCompany() { LP = emptyNIPCompanyID, NIP = string.Empty, RowNumber = 1 };
+            companiesToCheck.Add(emptyCompany.ID, emptyCompany);
+           
 
-            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(companiesToCheck.Values.ToList<Company>(), true);
+            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(companiesToCheck.Values.ToList<InputCompany>(), true, false);
 
-            KeyValuePair<string, WhiteListVerResult> companyIncorrectNipChecked = verResults.FirstOrDefault(vr => vr.Key == emptyNIPCompanyID);
+            KeyValuePair<string, WhiteListVerResult> companyIncorrectNipChecked = verResults.FirstOrDefault(vr => vr.Key == InputCompany.GetID(emptyCompany.RowNumber, emptyCompany.LP, emptyCompany.NIP));
             Assert.IsNotNull(companyIncorrectNipChecked);
             Assert.AreEqual(WhiteListVerResultStatus.ErrorNIPEmpty, companyIncorrectNipChecked.Value.VerificationStatus);
             Assert.IsTrue(DTHelper.IsItToday(companyIncorrectNipChecked.Value.VerificationDate));
 
-            companyIncorrectNipChecked = verResults.FirstOrDefault(vr => vr.Key == nullNipCompanyID);
-            Assert.IsNotNull(companyIncorrectNipChecked);
-            Assert.AreEqual(WhiteListVerResultStatus.ErrorNIPEmpty, companyIncorrectNipChecked.Value.VerificationStatus);
-            Assert.IsTrue(DTHelper.IsItToday(companyIncorrectNipChecked.Value.VerificationDate));
+           
 
-            foreach (var companyToCheck in companiesToCheck.Where(c => c.Key != nullNipCompanyID && c.Key != emptyNIPCompanyID))
+            foreach (var companyToCheck in companiesToCheck.Where(c => c.Key != InputCompany.GetID(emptyCompany.RowNumber, emptyCompany.LP, emptyCompany.NIP)))
             {
                 var companyChecked = verResults.FirstOrDefault(vr => vr.Key == companyToCheck.Key);
                 Assert.IsNotNull(companyChecked);
@@ -276,16 +273,17 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
         [Test]
         public void TestInActiveAndActiveCompaniesAndAccounts()
         {
-            var companiesToCheck = new Dictionary<string, Company>(CompanyGenerator.GetCorrectCompanies());
+            var companiesToCheck = new Dictionary<string, InputCompany>(CompanyGenerator.GetCorrectCompanies());
             string inActiveCompanyNIP = CompanyGenerator.GetZakonczoneUpadaloscioweNIP();
             string inActiveCompanyID = "u1";
             //add inactive company
-            companiesToCheck.Add(inActiveCompanyID, new Company() { NIP= inActiveCompanyNIP, ID= inActiveCompanyID });
+            InputCompany inactiveCompany = new InputCompany() { NIP = inActiveCompanyNIP, LP = inActiveCompanyID, RowNumber = 1 };
+            companiesToCheck.Add(inActiveCompanyID, inactiveCompany);
 
 
-            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(companiesToCheck.Values.ToList<Company>(),  true);
+            Dictionary<string, WhiteListVerResult> verResults = _verifier.VerifyCompanies(companiesToCheck.Values.ToList<InputCompany>(),  true, false);
 
-            var companyInacticeResultCheck = verResults.FirstOrDefault(vr => vr.Key == inActiveCompanyID);
+            var companyInacticeResultCheck = verResults.FirstOrDefault(vr => vr.Key == inactiveCompany.ID);
             Assert.IsNotNull(companyInacticeResultCheck);
             Assert.AreEqual(WhiteListVerResultStatus.NotActiveVATPayer, companyInacticeResultCheck.Value.VerificationStatus);
             Assert.IsTrue(DTHelper.IsItToday(companyInacticeResultCheck.Value.VerificationDate));

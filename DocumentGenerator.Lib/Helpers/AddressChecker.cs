@@ -82,20 +82,26 @@ namespace DocumentGenerator.Lib.Helpers
             }
 
             string postalCode = regEx.Match(addressline).Value;
-            List<PostAddress> codeAddresses = _addresses[postalCode];
-            string prefix = string.Empty;
-            foreach (var codeAddress in codeAddresses)
+            if (_addresses.ContainsKey(postalCode))
             {
-                if (codeAddress.Street != string.Empty)
+                List<PostAddress> codeAddresses = _addresses[postalCode];
+                string prefix = string.Empty;
+                foreach (var codeAddress in codeAddresses)
                 {
-                    prefix = "ul.";
-                } else if (!string.IsNullOrEmpty(prefix))
-                {
-                    prefix = string.Empty;
+                    if (codeAddress.Street != string.Empty)
+                    {
+                        prefix = "ul.";
+                    }
+                    else if (!string.IsNullOrEmpty(prefix))
+                    {
+                        prefix = string.Empty;
+                    }
                 }
+
+                return prefix;
             }
 
-            return prefix;
+            return string.Empty;
         }
     }
 }

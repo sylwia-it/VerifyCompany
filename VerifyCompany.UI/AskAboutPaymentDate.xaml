@@ -1,0 +1,29 @@
+﻿<Window x:Class="VerifyCompany.UI.AskAboutPaymentDate"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VerifyCompany.UI"
+        mc:Ignorable="d"
+        Title="Wybierz datę płatności" Height="350" Width="550" WindowStartupLocation="CenterOwner">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="181*"/>
+            <ColumnDefinition Width="80*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Label Grid.Row="0" Background="Gray" Opacity="0.785" FontWeight="Bold" FontSize="14" Grid.ColumnSpan="2" >Wybierz datę płatności do sprawdzenia</Label>
+        <Label Grid.Row="1" FontSize="13" TextOptions.TextHintingMode="Animated" Grid.ColumnSpan="2">W podanym pliku jest kilka dat płatności. Wybierz datę, dla której chcesz sprawdzić firmy.</Label>
+        <ComboBox Grid.Row="2" x:Name="scopeCB" Width="250" Margin="136,50,136,0" FontSize="16" Grid.ColumnSpan="2"></ComboBox>
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="136,50" HorizontalAlignment="Center" Grid.ColumnSpan="2">
+            <Button Margin="0,0,50,0" Height="30" Width="100" Click="CancelButton_Click">Anuluj</Button>
+            <Button Height="30" Width="100" Click="OKButton_Click">Dalej</Button>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -42,24 +42,24 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
 
             for (int i = 0; i < 10; i++)
             {
-                var b = _client.VerifyCompanies(nipsInString[i]).GetAwaiter().GetResult();
+                var b = _client.VerifyCompanies(nipsInString[i], DateTime.Now).GetAwaiter().GetResult();
                 Assert.IsNotNull(b.Result.RequestId);
                 Assert.IsNotNull(b.Result.RequestDateTime);
                 Assert.IsNotNull(b.Result.Entries);
                 //Assert.AreEqual(30, b.Result.Subjects.Count);
             }
 
-            _client.VerifyCompanies(nipsInString[10]).GetAwaiter().GetResult();
-            _client.VerifyCompanies(nipsInString[9]).GetAwaiter().GetResult();
-            _client.VerifyCompanies(nipsInString[8]).GetAwaiter().GetResult();
-            _client.VerifyCompanies(nipsInString[7]).GetAwaiter().GetResult();
-            _client.VerifyCompanies(nipsInString[6]).GetAwaiter().GetResult();
-            _client.VerifyCompanies(nipsInString[5]).GetAwaiter().GetResult();
-            _client.VerifyCompanies(nipsInString[4]).GetAwaiter().GetResult();
-            _client.VerifyCompanies(nipsInString[3]).GetAwaiter().GetResult();
-            _client.VerifyCompanies(nipsInString[2]).GetAwaiter().GetResult();
-            _client.VerifyCompanies(nipsInString[1]).GetAwaiter().GetResult();
-            _client.VerifyCompanies(nipsInString[0]).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[10], DateTime.Now).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[9], DateTime.Now).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[8], DateTime.Now).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[7], DateTime.Now).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[6], DateTime.Now).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[5], DateTime.Now).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[4], DateTime.Now).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[3], DateTime.Now).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[2], DateTime.Now).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[1], DateTime.Now).GetAwaiter().GetResult();
+            _client.VerifyCompanies(nipsInString[0], DateTime.Now).GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace VerifyWhiteListCompany.Lib.Test.ProductionEnv
             nipChunkToCheck.Remove(nipChunkToCheck.Length - 1);
                        
 
-            var exception = Assert.Throws<WhiteListClientException>( () => _client.VerifyCompanies(nipChunkToCheck).GetAwaiter().GetResult());
+            var exception = Assert.Throws<WhiteListClientException>( () => _client.VerifyCompanies(nipChunkToCheck, DateTime.Now).GetAwaiter().GetResult());
 
             var innerException = exception.GetException();
             Assert.AreEqual("WL-130", innerException.Code);

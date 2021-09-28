@@ -21,7 +21,7 @@ namespace ExcelDataManager.Lib.Test
         {
             FileInfo fI = new FileInfo(_filePathCorrect);
             if (fI.Exists)
-                _ssr = new SpreadSheetReader(fI.FullName, true);
+                _ssr = new SpreadSheetReader(fI.FullName, true, false);
             else
                 throw new FileLoadException("cannot load the input file");
 
@@ -43,7 +43,7 @@ namespace ExcelDataManager.Lib.Test
         {
             FileInfo fI = new FileInfo(_filePathCorrect);
             if (fI.Exists)
-                _ssr = new SpreadSheetReader(fI.FullName, false);
+                _ssr = new SpreadSheetReader(fI.FullName, false, false);
             else
                 throw new FileLoadException("cannot load the input file");
 
@@ -65,12 +65,12 @@ namespace ExcelDataManager.Lib.Test
         {
             FileInfo fI = new FileInfo(_filePathMinMissing);
             if (fI.Exists)
-                _ssr = new SpreadSheetReader(fI.FullName, true);
+                _ssr = new SpreadSheetReader(fI.FullName, true, false);
             else
                 throw new FileLoadException("cannot load the input file");
 
-            SpreadSheetReaderException e = Assert.Throws<SpreadSheetReaderException>(() => _ssr.ReadDataFromFile());
-            Assert.IsTrue(e.InnerException.Message.Contains("Nie wszystkie kolumny s¹ obecne"));
+            SpreadSheetReaderMissingColumnsException e = Assert.Throws<SpreadSheetReaderMissingColumnsException>(() => _ssr.ReadDataFromFile());
+            Assert.IsTrue(e.Message.Contains("Nie wszystkie kolumny s¹ obecne"));
         }
 
         [Test]
@@ -78,12 +78,12 @@ namespace ExcelDataManager.Lib.Test
         {
             FileInfo fI = new FileInfo(_filePathNoteissing);
             if (fI.Exists)
-                _ssr = new SpreadSheetReader(fI.FullName, true);
+                _ssr = new SpreadSheetReader(fI.FullName, true, false);
             else
                 throw new FileLoadException("cannot load the input file");
 
-            SpreadSheetReaderException e = Assert.Throws<SpreadSheetReaderException>(() => _ssr.ReadDataFromFile());
-            Assert.IsTrue(e.InnerException.Message.Contains("dotycz¹ce not"));
+            SpreadSheetReaderMissingColumnsException e = Assert.Throws<SpreadSheetReaderMissingColumnsException>(() => _ssr.ReadDataFromFile());
+            Assert.IsTrue(e.Message.Contains("Nie wszystkie kolumny s¹ obecne"));
         }
 
 

@@ -17,16 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\VerifyCompany.Common.Lib\VerifyCompany.Common.Lib.csproj" />
+    <ProjectReference Include="..\VerifyCompany.Common.Test.Lib\VerifyCompany.Common.Test.Lib.csproj" />
     <ProjectReference Include="..\VerifyWhiteListCompany.Lib\VerifyWhiteListCompany.Lib.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="VerifyCompany.Common.Test.Lib">
-      <HintPath>..\VerifyCompany.Common.Test.Lib\bin\$(Configuration)\netcoreapp3.1\VerifyCompany.Common.Test.Lib.dll</HintPath>
-    </Reference>
-    <Reference Include="VerifyCompany.Common.Lib">
-      <HintPath>..\VerifyCompany.Common.Lib\bin\$(Configuration)\netcoreapp3.1\VerifyCompany.Common.Lib.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>

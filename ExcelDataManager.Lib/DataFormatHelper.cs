@@ -49,11 +49,25 @@ namespace ExcelDataManager.Lib
             {
                 if (!string.IsNullOrEmpty(account))
                 {
-                    sB.AppendFormat("{0} ,", GetAccountInString(account));
+                    sB.AppendFormat("{0} , ", GetAccountInString(account));
                 }
             }
 
             return sB.ToString();
+        }
+
+        private static readonly string[] polishLetters = new string[] { "ą", "ę", "ż", "ź", "ń", "ł", "ó", "ć", "ś" };
+        private static readonly string[] polishLettersNonAcent = new string[] { "a", "e", "z", "z", "n", "l", "o", "c", "s" };
+        internal static string RemovePolishLetters(string tempCellContent)
+        {
+            string result = tempCellContent;
+
+            for (int i=0; i < polishLetters.Length; i++)
+            {
+                result = result.Replace(polishLetters[i], polishLettersNonAcent[i]);
+            }
+
+            return result;
         }
     }
 }

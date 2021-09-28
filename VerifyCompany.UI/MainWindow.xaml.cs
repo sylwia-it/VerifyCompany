@@ -16,6 +16,14 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 using ExcelDataManager.Lib.Import;
+using VerifyCompany.Common.Lib;
+using VerifyCompany.UI.Helpers;
+using VerifyNIPActivePayer.Lib;
+using VerifyActiveCompany.Lib;
+using VerifyWhiteListCompany.Lib;
+using VerifyCompany.UI.Data;
+using ExcelDataManager.Lib.Export;
+using DocumentGenerator.Lib;
 
 namespace VerifyCompany.UI
 {
@@ -24,9 +32,17 @@ namespace VerifyCompany.UI
     /// </summary>
     public partial class MainWindow : Window
     {
+        private const string _errorsResult = "BŁĘDY:\n";
+        private bool _scroll = true;
+        private List<InputCompany> _companiesReadFromFile;
+        private VerificationResult _verificationResult;
+        private SearchSettings _searchSettings;
+
         public MainWindow()
         {
             InitializeComponent();
+            
+            
         }
 
         private async void VerifyNIPsFromSpreadSheet()
@@ -47,97 +63,255 @@ namespace VerifyCompany.UI
 
                     BackUpTheFile(dialog.FileName);
 
-                    var searchSettings = GetSearchSettingsFromUI();
+                    _searchSettings = GetSearchSettingsFromUI();
+                    _searchSettings.InputFileDir = dialog.FileName.Substring(0, dialog.FileName.LastIndexOf("\\"));
+                    _searchSettings.InputFileName = dialog.FileName.Substring(dialog.FileName.LastIndexOf("\\") + 1);
 
-
-                    var progress = new Progress<string>(report =>
+                    IProgress<string> progress = new Progress<string>(report =>
                     {
                         resultTBl.Text += report;
+                        if (_scroll)
+                            resultTBl.ScrollToEnd();
                     });
 
+                    await Task.Factory.StartNew(() => ReadInputFile(dialog.FileName, _searchSettings, progress));
 
+                    _verificationResult = new VerificationResult();
+                    _verificationResult.ErroredWhileReadingInputFileCompanies = _companiesReadFromFile.Where(c => c.FormatErrors != null && c.FormatErrors.Count > 0).ToList();
+                    _companiesReadFromFile = _companiesReadFromFile.Where(c => c.FormatErrors == null || c.FormatErrors.Count == 0 || (c.FormatErrors.Count == 1 && c.FormatErrors.Contains(InputCompanyFormatError.BankAccountFormatError))).ToList();
 
-                    await Task.Factory.StartNew(() => ReadInputFile(dialog.FileName, searchSettings, progress));
+                    DateTime startTime = DateTime.Now;
 
-                    //    if (onlyWithPaymentDateInColumn == true)
-                    //    {
-                    //        var dates = from c in companiesReadFromFile
-                    //                    where !string.IsNullOrEmpty(c.PaymentDate)
-                    //                    select c.PaymentDate;
+                    if (_searchSettings.ImportCompaniesOnlyWithPaymentDateInColumn == true)
+                    {
+                        AskToSelectOnePaymentDate();
+                    }
 
-                    //        dates = dates.Distinct();
+                    _searchSettings.ScopeStart = 1;
+                    _searchSettings.ScopeEnd = _companiesReadFromFile.Count;
 
-                    //        if (dates.Count() > 1)
-                    //        {
-                    //            AskAboutPaymentDate askAboutPaymentDateWindow;
-                    //            askAboutPaymentDateWindow = new AskAboutPaymentDate(dates.ToList());
-                    //            if (askAboutPaymentDateWindow.ShowDialog() == true)
-                    //            {
-                    //                foreach (var company in companiesReadFromFile)
-                    //                {
-                    //                    string dateToVerify = askAboutPaymentDateWindow.SelectedScope;
-                    //                    company.IsToBeVerified = company.PaymentDate == dateToVerify;
-                    //                }
-                    //            }
-                    //            else
-                    //            {
-                    //                this.Close();
-                    //            }
-                    //        }
-                    //        else
-                    //        {
-                    //            foreach (var company in companiesReadFromFile)
-                    //            {
-                    //                company.IsToBeVerified = !string.IsNullOrEmpty(company.PaymentDate);
-                    //            }
+                    if (_companiesReadFromFile.Count > CompanyScopeHelper.ScopeLimit)
+                    {
+                        AskToSelectScope(ref _searchSettings);
+                    }
 
-                    //        }
-                    //        companiesReadFromFile = companiesReadFromFile.Where(c => c.IsToBeVerified == true).ToList();
-                    //    }
+                    _companiesReadFromFile = _companiesReadFromFile.Skip(_searchSettings.ScopeStart - 1).Take(_searchSettings.ScopeEnd - _searchSettings.ScopeStart + 1).ToList();
+                    
 
-                    //    scopeStart = 1;
-                    //    scopeEnd = companiesReadFromFile.Count;
+                    progress.Report(string.Format("{0}: Wczytano dane z pliku. Czas trwania operacji: {1}s.\n", DateTime.Now.ToLongTimeString(), Math.Round((DateTime.Now - startTime).TotalSeconds, 0)));
 
-                    //    if (companiesReadFromFile.Count > scopeLimit)
-                    //    {
-                    //        AskAboutNIPLimits askAboutNIPLimitsWindow;
-                    //        List<string> scopesToAnalyze = GetScopesToAnalyze(companiesReadFromFile.Count);
-                    //        askAboutNIPLimitsWindow = new AskAboutNIPLimits(scopesToAnalyze);
-                    //        if (askAboutNIPLimitsWindow.ShowDialog() == true)
-                    //        {
-                    //            scopeStart = GetStartScope(askAboutNIPLimitsWindow.SelectedScope);
-                    //            scopeEnd = GetEndScope(askAboutNIPLimitsWindow.SelectedScope);
-                    //        }
-                    //        else
-                    //        {
-                    //            this.Close();
-                    //        }
-                    //    }
+                    await Task.Factory.StartNew(() => VerifyCompanies(_searchSettings, progress));
 
-                    //    companiesReadFromFile = companiesReadFromFile.Skip(scopeStart - 1).Take(scopeEnd - scopeStart + 1).ToList();
+                    if (_searchSettings.GenerateNotes)
+                    {
+                        await Task.Factory.StartNew(() => GenerateNotes(_searchSettings, progress));
+                    }
 
-                    //    await Task.Factory.StartNew(() => ReadAndVerify(dialog.FileName, generateNotes, addAccountsInSeparateColumns, progress));
+                    string task = await Task.Factory.StartNew(() => StoreResultsToFilesAndShowToUser(_searchSettings, progress));
+
+                    printBtn.DataContext = task;
+                    printBtn.IsEnabled = true;
+                    printBtn.Visibility = Visibility.Visible;
+
                 }
+
             }
             catch (System.Exception e)
             {
-                resultTBl.Text += string.Concat("Wystąpił błąd. Skontaktuj się z administratorem.\n \n", e.Message, "\n", e.StackTrace);
+                resultTBl.Text += string.Concat("Wystąpił błąd. Skontaktuj się z administratorem.\n \n", e.Message, "\n\n\nInformacja dla administratora:", e.StackTrace);
+            }
+        }
+        private void GenerateNotes(SearchSettings searchSettings, IProgress<string> progress)
+        {
+            progress.Report(string.Format("{0}: Rozpoczęto generowanie not.\n", DateTime.Now.ToLongTimeString()));
+
+            NoteGenerator noteGenerator = new NoteGenerator();
+            string outputPath = searchSettings.InputFileDir;
+            noteGenerator.GenerateNotes(outputPath, _companiesReadFromFile, _verificationResult.WhiteListCompVerResult, searchSettings.ExportToPdf);
+
+            progress.Report(string.Format("{0}: Zakończono generowanie not.\n", DateTime.Now.ToLongTimeString()));
+
+        }
+        /// <summary>
+        /// Saves to txt  files all the results and errors
+        /// </summary>
+        /// <param name="searchSettings"></param>
+        /// <param name="progress"></param>
+        /// <returns>errors that were detected</returns>
+        private string StoreResultsToFilesAndShowToUser(SearchSettings searchSettings, IProgress<string> progress)
+        {
+            progress.Report(string.Format("{0}: Rozpoczęto zapis do pliku tekstowego.\n", DateTime.Now.ToLongTimeString()));
+
+            TxtResultExporter txtResultFileWriter = new TxtResultExporter();
+            txtResultFileWriter.StoreToFile(_verificationResult, searchSettings);
+
+            progress.Report(string.Format("{0}: Zakończono zapis do pliku tekstowego.\n", DateTime.Now.ToLongTimeString()));
+
+            progress.Report(string.Format("{0}: Rozpoczęto zapis do pliku Excel.\n", DateTime.Now.ToLongTimeString()));
+
+            string fullPathToInputExportFile = string.Format($"{searchSettings.InputFileDir}\\{searchSettings.InputFileName}");
+            SpreadSheetWriter ssWriter = new SpreadSheetWriter(fullPathToInputExportFile);
+            ssWriter.WriteResultsToFile(_companiesReadFromFile, _verificationResult.ErroredWhileReadingInputFileCompanies, _verificationResult.VatSystemVerResultForInvoiceDate, _verificationResult.BiRSystemVerResult, _verificationResult.WhiteListCompVerResult, _verificationResult.WhiteListCompVerResultForInvoiceData, searchSettings.AddAccountsInSeparateColumns);
+
+            progress.Report(string.Format("{0}: Zakończono zapis do pliku Excel.\n", DateTime.Now.ToLongTimeString()));
+
+            progress.Report("-----------------------------------------------\n");
+            progress.Report(_errorsResult);
+            _scroll = false;
+            progress.Report(txtResultFileWriter.Errors.ToString());
+
+            return txtResultFileWriter.Errors.ToString();
+
+        }
+
+        private void VerifyCompanies(SearchSettings searchSettings, IProgress<string> progress)
+        {
+            progress.Report(string.Format("{0}: Rozpoczęto weryfikację firm w wybranach bazach.\n", DateTime.Now.ToLongTimeString()));
+
+         
+            if (searchSettings.VerifyCompaniesInVATSystem)
+            {
+                VerifyCompaniesInVATSystem(searchSettings, progress);
+            }
+
+            if (searchSettings.VerifyCompaniesInBiRSystem)
+            {
+                VerifyCompaniesInBiRSystem(searchSettings, progress);
+            }
+
+            if (searchSettings.VerifyCompaniesInWhiteListSystem)
+            {
+                VerifyCompaniesInWhiteListSystem(searchSettings, progress);
             }
         }
 
-        private void ReadInputFile(string fileName, SearchSettings searchSettings, IProgress<string> progress)
+        private void VerifyCompaniesInVATSystem(SearchSettings searchSettings, IProgress<string> progress)
         {
-            
-                DateTime startTime = DateTime.Now;
+            DateTime startTime = DateTime.Now;
+            progress.Report(string.Format("{0}: Rozpoczęto weryfikację firm w bazie VAT (NIP).\n", DateTime.Now.ToLongTimeString()));
+
+
+            NIPActivePayerVerifier verifier = new NIPActivePayerVerifier();
+            _verificationResult.VatSystemVerResultForInvoiceDate = verifier.VerifyNIPs(_companiesReadFromFile);
+
+            //if (_searchSettings.VerifyAlsoForInvoiceDate)
+           // {
+            //    _verificationResult.VatSystemVerResultForInvoiceDate = verifier.VerifyNIPs(_companiesReadFromFile, true);
+           // }
+
+
+            progress.Report(string.Format("{0}: Zakończono sprawdzanie NIPów. Czas trwania operacji: {1}s.\n", DateTime.Now.ToLongTimeString(), Math.Round((DateTime.Now - startTime).TotalSeconds, 0)));
 
             
-                progress.Report(string.Format("{0}: Rozpoczęto wczytywanie danych z pliku.\n", DateTime.Now.ToLongTimeString()));
+        }
 
-                //SpreadSheetReader ssReader = new SpreadSheetReader(filePath, generateNotes);
-                //ssReader.ReadDataFromFile();
-                //companiesReadFromFile = ssReader.CompaniesReadFromFile;
+        private void VerifyCompaniesInBiRSystem(SearchSettings searchSettings, IProgress<string> progress)
+        {
+            DateTime startTime = DateTime.Now;
+            progress.Report(string.Format("{0}: Rozpoczęto sprawdzenie w systemie BiR (REGON).\n", DateTime.Now.ToLongTimeString()));
+
+            BiRVerifier biRVerifier = new BiRVerifier();
+
+            _verificationResult.BiRSystemVerResult = biRVerifier.AreCompaniesActive(_companiesReadFromFile);
+            biRVerifier.Finish();
+
+            progress.Report(string.Format("{0}: Zakończono sprawdzanie w systemie BiR (REGON). Czas trwania operacji: {1}s.\n", DateTime.Now.ToLongTimeString(), Math.Round((DateTime.Now - startTime).TotalSeconds, 0)));
 
             
+        }
+        private void VerifyCompaniesInWhiteListSystem(SearchSettings searchSettings, IProgress<string> progress)
+        {
+            DateTime startTime = DateTime.Now;
+            progress.Report(string.Format("{0}: Rozpoczęto sprawdzenie na Liście Białych Firm.\n", DateTime.Now.ToLongTimeString(), Math.Round((DateTime.Now - startTime).TotalSeconds, 0)));
+
+            WhiteListCompanyVerifier whiteListCompVerifier = new WhiteListCompanyVerifier();
+            _verificationResult.WhiteListCompVerResult = whiteListCompVerifier.VerifyCompanies(_companiesReadFromFile, true, false);
+
+            if (_searchSettings.VerifyAlsoForInvoiceDate)
+            {
+                _verificationResult.WhiteListCompVerResultForInvoiceData = whiteListCompVerifier.VerifyCompanies(_companiesReadFromFile, true, true);
+            }
+
+            progress.Report(string.Format("{0}: Zakończono sprawdzanie na Liście Białych Firm. Czas trwania operacji: {1}s.\n", DateTime.Now.ToLongTimeString(), Math.Round((DateTime.Now - startTime).TotalSeconds, 0)));
+            
+        }
+
+        private void AskToSelectScope(ref SearchSettings searchSettings)
+        {
+            AskToSelectScope askToSelectScopeWindow;
+            List<string> scopesToAnalyze = CompanyScopeHelper.GetListOfScopes(_companiesReadFromFile.Count);
+            askToSelectScopeWindow = new AskToSelectScope(scopesToAnalyze);
+            askToSelectScopeWindow.Owner = this;
+            if (askToSelectScopeWindow.ShowDialog() == true)
+            {
+                searchSettings.ScopeStart = CompanyScopeHelper.GetStartScope(askToSelectScopeWindow.SelectedScope);
+                searchSettings.ScopeEnd = CompanyScopeHelper.GetEndScope(askToSelectScopeWindow.SelectedScope);
+            }
+            else
+            {
+                this.Close();
+            }
+        }
+
+        private void AskToSelectOnePaymentDate()
+        {
+            var dates = from c in _companiesReadFromFile
+                             where !string.IsNullOrEmpty(c.PaymentDate)
+                              select c.PaymentDate;
+
+            dates = dates.Distinct();
+
+            if (dates.Count() > 1)
+            {
+                AskAboutPaymentDate askAboutPaymentDateWindow;
+                askAboutPaymentDateWindow = new AskAboutPaymentDate(dates.ToList());
+                askAboutPaymentDateWindow.Owner = this;
+                if (askAboutPaymentDateWindow.ShowDialog() == true)
+                {
+                    string dateToBeVerified = askAboutPaymentDateWindow.SelectedPaymentDate;
+
+                    foreach (var company in _companiesReadFromFile)
+                    {
+                        company.IsToBeVerified = company.PaymentDate == dateToBeVerified;
+                    }
+                }
+                else
+                {
+                    this.Close();
+                }
+            }
+            else if (dates.Count() == 1)
+            {
+                string msg = string.Format($"Jest tylko jedna data płatności {dates.FirstOrDefault()} Firmy z tą datą zostaną sprawdzone.");
+                MessageBox.Show(msg, "Tylko jedna data", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                //The companies withour payment date are NOT to be verified
+                foreach (var company in _companiesReadFromFile)
+                {
+                    company.IsToBeVerified = !string.IsNullOrEmpty(company.PaymentDate);
+                }
+
+            } else
+            {
+                MessageBox.Show("Brak firm z datą zapłaty. Naciśnij OK, aby zamknąć program.", "Brak firm z datą zapłaty", MessageBoxButton.OK, MessageBoxImage.Error);
+                this.Close();
+            }
+            
+            _companiesReadFromFile = _companiesReadFromFile.Where(c => c.IsToBeVerified == true).ToList();
+        }
+
+        private void ReadInputFile(string filePath, SearchSettings searchSettings, IProgress<string> progress)
+        {
+            DateTime startTime = DateTime.Now;
+
+            progress.Report(string.Format("{0}: Rozpoczęto wczytywanie danych z pliku.\n", DateTime.Now.ToLongTimeString()));
+            progress.Report(string.Format("{0}: Nazwa pliku: {1}.\n", DateTime.Now.ToLongTimeString(), searchSettings.InputFileName));
+            progress.Report(string.Format("{0}: Pełna ścieżka pliku: {1}\\{2}.\n", DateTime.Now.ToLongTimeString(), searchSettings.InputFileDir, searchSettings.InputFileName));
+
+            SpreadSheetReader ssReader = new SpreadSheetReader(filePath, searchSettings.GenerateNotes, searchSettings.VerifyAlsoForInvoiceDate);
+
+            _companiesReadFromFile = ssReader.ReadDataFromFile();
+
         }
 
         private SearchSettings GetSearchSettingsFromUI()
@@ -149,6 +323,8 @@ namespace VerifyCompany.UI
             settings.VerifyCompaniesInVATSystem = verifyCompaniesInNipSystemCB.IsChecked ?? false;
             settings.VerifyCompaniesInBiRSystem = verifyCompaniesInBiRSystemCB.IsChecked ?? false;
             settings.VerifyCompaniesInWhiteListSystem = verifyCompaniesInWhiteListSystemCB.IsChecked ?? false;
+            settings.ExportToPdf = exportToPDFCB.IsChecked ?? false;
+            settings.VerifyAlsoForInvoiceDate = checkForInvoiceDateCB.IsChecked ?? false;
 
             return settings;
         }
@@ -174,13 +350,81 @@ namespace VerifyCompany.UI
             importCompaniesOnlyWithPaymentDateCB.IsEnabled = false;
             generateNotesCB.IsEnabled = false;
             addAccountsInSeparateColumnsCB.IsEnabled = false;
+            exportToPDFCB.IsEnabled = false;
+            checkForInvoiceDateCB.IsEnabled = false;
 
             selectFileBtn.IsEnabled = false;
+
         }
 
-        private void selectFileBtn_Click(object sender, RoutedEventArgs e)
+        private void SelectFileBtn_Click(object sender, RoutedEventArgs e)
         {
+          
 
+            VerifyNIPsFromSpreadSheet();
+
+        }
+
+        private void PrintBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender as Button).DataContext != null)
+            {
+                string sB = (sender as Button).DataContext as string;
+
+                if (sB != null)
+                {
+                    
+                    PrintDialog printDlg = new PrintDialog();
+                      
+                    FlowDocument doc = CreateFlowDocument(sB);
+                    doc.Name = "Errors";
+                    IDocumentPaginatorSource idpSource = doc;
+                    printDlg.PrintDocument(idpSource.DocumentPaginator, "Drukowanie błędów.");
+                }
+                else 
+                {
+                    MessageBox.Show( "Wystąpił błąd. Nie można eksportować danych.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
+            }
+            else
+            {
+                MessageBox.Show( "Wystąpił błąd. Nie można eksportować danych.", "Błąd", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private FlowDocument CreateFlowDocument(string sB)
+        {
+            FlowDocument doc = new FlowDocument();
+            doc.PageWidth = 793;// a4 width in px
+            doc.ColumnWidth = doc.PageWidth - 30;
+
+            Section sec = new Section();
+            
+            Paragraph paragrph = new Paragraph();
+            Bold bld = new Bold();
+            bld.Inlines.Add(new Run($"Sprawdzanie firm"));
+            paragrph.Inlines.Add(bld);
+            paragrph.Inlines.Add(new LineBreak());
+            paragrph.Inlines.Add($"Data: {DateTime.Now}");
+            paragrph.Inlines.Add(new LineBreak());
+            paragrph.Inlines.Add($"Plik: {_searchSettings.InputFileName}");
+            sec.Blocks.Add(paragrph);
+
+            paragrph = new Paragraph();
+            bld = new Bold();
+            bld.Inlines.Add(new Run("BŁĘDY:"));
+            paragrph.Inlines.Add(bld);
+            sec.Blocks.Add(paragrph);
+
+            paragrph = new Paragraph();
+            string errors = sB.ToString();
+            errors = errors.Replace("Wiersz", "-- Wiersz");
+            paragrph.Inlines.Add(new Run(errors));
+            sec.Blocks.Add(paragrph);
+
+            doc.Blocks.Add(sec);
+            return doc;
         }
     }
 }

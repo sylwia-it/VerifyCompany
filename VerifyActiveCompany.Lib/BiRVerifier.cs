@@ -45,25 +45,25 @@ namespace VerifyActiveCompany.Lib
         private string GetMessageWithDetailedData(BiRVerifyResult result, BiRCompany biRCompany)
         {
             string fullMessage = result.Message;
-            if (biRCompany.ZawieszeniaDate == DateTime.MinValue)
+            if (biRCompany.ZawieszeniaDate != DateTime.MinValue)
             {
-                fullMessage = string.Concat(fullMessage, $" Data zawieszenia działaności: {biRCompany.ZawieszeniaDate}.");
+                fullMessage = string.Concat(fullMessage, $" Data zawieszenia działaności: {biRCompany.ZawieszeniaDate.ToShortDateString()}.");
             }
-            if (biRCompany.ZakonczeniaDzialalnosciDate == DateTime.MinValue)
+            if (biRCompany.ZakonczeniaDzialalnosciDate != DateTime.MinValue)
             {
-                fullMessage = string.Concat(fullMessage, $" Data zakończenia: {biRCompany.ZakonczeniaDzialalnosciDate}.");
+                fullMessage = string.Concat(fullMessage, $" Data zakończenia: {biRCompany.ZakonczeniaDzialalnosciDate.ToShortDateString()}.");
             }
-            if (biRCompany.SkresleniaRegonDate == DateTime.MinValue)
+            if (biRCompany.SkresleniaRegonDate != DateTime.MinValue)
             {
-                fullMessage = string.Concat(fullMessage, $" Data skreślenia z Regon: {biRCompany.SkresleniaRegonDate}.");
+                fullMessage = string.Concat(fullMessage, $" Data skreślenia z Regon: {biRCompany.SkresleniaRegonDate.ToShortDateString()}.");
             }
-            if (biRCompany.OrzeczenieOUpadlosciDate == DateTime.MinValue)
+            if (biRCompany.OrzeczenieOUpadlosciDate != DateTime.MinValue)
             {
-                fullMessage = string.Concat(fullMessage, $" Data orzeczenia o upadłości: {biRCompany.OrzeczenieOUpadlosciDate}.");
+                fullMessage = string.Concat(fullMessage, $" Data orzeczenia o upadłości: {biRCompany.OrzeczenieOUpadlosciDate.ToShortDateString()}.");
             }
-            if (biRCompany.ZakonczeniePostepowaniaUpadlosiowegoDate == DateTime.MinValue)
+            if (biRCompany.ZakonczeniePostepowaniaUpadlosiowegoDate != DateTime.MinValue)
             {
-                fullMessage = string.Concat(fullMessage, $" Data zakończenia postępowania upadłoćiowego: {biRCompany.ZakonczeniePostepowaniaUpadlosiowegoDate}.");
+                fullMessage = string.Concat(fullMessage, $" Data zakończenia postępowania upadłościowego: {biRCompany.ZakonczeniePostepowaniaUpadlosiowegoDate.ToShortDateString()}.");
             }
 
             return fullMessage;
@@ -96,7 +96,7 @@ namespace VerifyActiveCompany.Lib
             }
         }
 
-        public Dictionary<string, BiRVerifyResult> AreCompaniesActive(Dictionary<string, Company> inputCompanies)
+        public Dictionary<string, BiRVerifyResult> AreCompaniesActive(List<InputCompany> inputCompanies)
         {
             if (inputCompanies == null || inputCompanies.Count == 0)
                 return null;
@@ -105,15 +105,13 @@ namespace VerifyActiveCompany.Lib
 
             foreach (var company in inputCompanies)
             {
-                if (company.Value != null)
+                if (company != null)
                 {
-                    BiRVerifyResult verResult = IsCompanyActive(company.Value.NIP);
-                    result.Add(company.Key, verResult);
+                    BiRVerifyResult verResult = IsCompanyActive(company.NIP);
+                    result.Add(company.ID, verResult);
+                    
                 }
-                else
-                {
-                    result.Add(company.Key, new BiRVerifyResult(BiRVerifyStatus.CompanyIsNull));
-                }
+               
             }
             
             

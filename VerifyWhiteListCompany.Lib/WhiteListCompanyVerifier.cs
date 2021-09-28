@@ -53,11 +53,10 @@ namespace VerifyWhiteListCompany.Lib
         /// see more: https://www.gov.pl/web/kas/api-wykazu-podatnikow-vat
         /// </summary>
         /// <param name="inputCompaniesToVerify"></param>
-        /// <param name="riskyInputCompanies">Risky companies are to be verified separetly</param>
         /// <param name="verifyBankAccount">If the bank account shall be verified if exists on the list of allowed/correct bank accounts</param>
         /// <returns><code>null</code> when there are no companies to verify</returns>
         /// <exception cref="ArgumentNullException">When input companies are null.</exception>
-        public Dictionary<string, WhiteListVerResult> VerifyCompanies(List<Company> inputCompaniesToVerify, bool verifyBankAccount)
+        public Dictionary<string, WhiteListVerResult> VerifyCompanies(List<InputCompany> inputCompaniesToVerify, bool verifyBankAccount, bool verifyForInvoiceDate)
         {
             if (inputCompaniesToVerify == null)
             {
@@ -71,24 +70,47 @@ namespace VerifyWhiteListCompany.Lib
 
             Dictionary<string, WhiteListVerResult> result = new Dictionary<string, WhiteListVerResult>();
 
-            List<Company> companiesToVerify = inputCompaniesToVerify.Where(c => !string.IsNullOrEmpty(c.NIP)).ToList();
-            List<Company> nipEmptyCompanies = inputCompaniesToVerify.Where(iC => string.IsNullOrEmpty(iC.NIP)).ToList();
+            List<InputCompany> companiesToVerify = inputCompaniesToVerify.Where(c => !string.IsNullOrEmpty(c.NIP)).ToList();
+            List<InputCompany> nipEmptyCompanies = inputCompaniesToVerify.Where(iC => string.IsNullOrEmpty(iC.NIP)).ToList();
 
             try
-            {  
-                for (int i = 0; i <= companiesToVerify.Count / _maxNumOfNipsPerOneRequest && i < _maxNumOfRequestsPerDay; i++)
+            {
+                if (!verifyForInvoiceDate)
                 {
-                    var chunkOfCompaies = companiesToVerify.Skip(i * _maxNumOfNipsPerOneRequest).Take(_maxNumOfNipsPerOneRequest).ToList();
-                    string nipsInString = GetNIPsInOneString(chunkOfCompaies);
-                    Dictionary<string, WhiteListVerResult> chunkVerification = VerifyChunkOfCompanies(chunkOfCompaies, nipsInString, verifyBankAccount);
-                    foreach (var verResult in chunkVerification)
+                    for (int i = 0; i <= companiesToVerify.Count / _maxNumOfNipsPerOneRequest && i < _maxNumOfRequestsPerDay; i++)
                     {
-                        result.Add(verResult.Key, verResult.Value);
-                        _numOfNipsAskedInTheAppRun++;
+                        var chunkOfCompaies = companiesToVerify.Skip(i * _maxNumOfNipsPerOneRequest).Take(_maxNumOfNipsPerOneRequest).ToList();
+                        string nipsInString = GetNIPsInOneString(chunkOfCompaies);
+                        Dictionary<string, WhiteListVerResult> chunkVerification = VerifyChunkOfCompanies(chunkOfCompaies, nipsInString, DateTime.Now, verifyBankAccount);
+                        foreach (var verResult in chunkVerification)
+                        {
+                            result.Add(verResult.Key, verResult.Value);
+                            _numOfNipsAskedInTheAppRun++;
+                        }
+                        _numOfRequestsInTheAppRun++;
                     }
-                    _numOfRequestsInTheAppRun++;
                 }
-
+                else
+                {
+                    var groupsOfComapnies = companiesToVerify.GroupBy(c => c.InvoiceDate, c => c);
+                    foreach (var groupOfComanies in groupsOfComapnies)
+                    {
+                        for (int i = 0; i <= groupOfComanies.Count() / _maxNumOfNipsPerOneRequest; i++)
+                        {
+                            var chunkOfCompaies = groupOfComanies.Skip(i * _maxNumOfNipsPerOneRequest).Take(_maxNumOfNipsPerOneRequest).ToList();
+                            if (chunkOfCompaies.Count == 0)
+                            { continue; }
+                            string nipsInString = GetNIPsInOneString(chunkOfCompaies);
+                            Dictionary<string, WhiteListVerResult> chunkVerification = VerifyChunkOfCompanies(chunkOfCompaies, nipsInString, chunkOfCompaies[0].InvoiceDate, verifyBankAccount);
+                            foreach (var verResult in chunkVerification)
+                            {
+                                result.Add(verResult.Key, verResult.Value);
+                                _numOfNipsAskedInTheAppRun++;
+                            }
+                            _numOfRequestsInTheAppRun++;
+                        }
+                    }
+                }
                
                 if (nipEmptyCompanies != null)
                 {
@@ -116,59 +138,71 @@ namespace VerifyWhiteListCompany.Lib
             return result;
         }
 
-        private  Dictionary<string, WhiteListVerResult> VerifyChunkOfCompanies(List<Company> chunkOfCompaies, string nipsInString, bool verifyBankAccount)
+        private  Dictionary<string, WhiteListVerResult> VerifyChunkOfCompanies(List<InputCompany> chunkOfCompaies, string nipsInString, DateTime dateOfRequest, bool verifyBankAccount)
         {
             EntryListResponse content = null;
             Dictionary<string, WhiteListVerResult> result = new Dictionary<string, WhiteListVerResult>();
             WhiteListVerResult tempWhiteListVerResult = null;
 
-            content = _whiteListClient.VerifyCompanies(nipsInString).GetAwaiter().GetResult();
+            content = _whiteListClient.VerifyCompanies(nipsInString, dateOfRequest).GetAwaiter().GetResult();
             
             foreach (var companyToVerify in chunkOfCompaies)
             {
-                tempWhiteListVerResult = new WhiteListVerResult()
-                {
-                    Nip = companyToVerify.NIP,
-                    GivenAccountNumber = companyToVerify.BankAccountNumber is null ? string.Empty : companyToVerify.BankAccountNumber,
-                    VerificationDate = DateTime.Now.ToString()
-                };
-
-                if (content == null || content.Result == null || content.Result.Entries == null)
-                {
-                    AddInformationAboutGeneralError(ref tempWhiteListVerResult, content);
-                }
-                else
-                {
-                    tempWhiteListVerResult.ConfirmationResponseString = content.Result.RequestId;
-                    tempWhiteListVerResult.VerificationDate = content.Result.RequestDateTime;
-
-                    var verifiedCompanies = content.Result.Entries;
-
-                    if (verifiedCompanies.Any(c => c.Identifier == companyToVerify.NIP))
-                    {
-                        Entry verifiedCompanyEntry = verifiedCompanies.FirstOrDefault(c => c.Identifier == companyToVerify.NIP);
-                        if (verifiedCompanyEntry.Subjects == null || verifiedCompanyEntry.Error !=null || verifiedCompanyEntry.Subjects.Count != 1 )
-                        {
-                            AddInformationAboutError(ref tempWhiteListVerResult, verifiedCompanyEntry);
-                        }
-                        else
-                        {
-                            AddInformationAboutVerifiedCompany(ref tempWhiteListVerResult, companyToVerify, verifiedCompanyEntry.Subjects[0], verifyBankAccount);
-                        }
-                    }
-                    else
-                    {
-                        tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.NotInVATRegisterCompany;
-                        tempWhiteListVerResult.SetVerStatusMessage(_notInVATRegiestrCompany);
-                    }
-                }
+                tempWhiteListVerResult = ExtractResultForCompanyFromResponse(verifyBankAccount, content, companyToVerify);
                 result.Add(companyToVerify.ID, tempWhiteListVerResult);
             }
 
             return result;
         }
 
-        private void AddInformationAboutVerifiedCompany(ref WhiteListVerResult tempWhiteListVerResult, Company companyToVerify, Entity verifiedCompany, bool verifyBankAccount)
+        private WhiteListVerResult ExtractResultForCompanyFromResponse(bool verifyBankAccount, EntryListResponse content, InputCompany companyToVerify)
+        {
+            WhiteListVerResult tempWhiteListVerResult = new WhiteListVerResult()
+            {
+                Nip = companyToVerify.NIP,
+                VerificationDate = DateTime.Now.ToString()
+            };
+            if (companyToVerify.BankAccountNumber is null || companyToVerify.FormatErrors.Contains(InputCompanyFormatError.BankAccountFormatError))
+            {
+                tempWhiteListVerResult.GivenAccountNumber = string.Empty;
+            }
+            else { tempWhiteListVerResult.GivenAccountNumber = companyToVerify.BankAccountNumber; }
+    
+            
+            if (content == null || content.Result == null || content.Result.Entries == null)
+            {
+                AddInformationAboutGeneralError(ref tempWhiteListVerResult, content);
+            }
+            else
+            {
+                tempWhiteListVerResult.ConfirmationResponseString = content.Result.RequestId;
+                tempWhiteListVerResult.VerificationDate = content.Result.RequestDateTime;
+
+                var verifiedCompanies = content.Result.Entries;
+
+                if (verifiedCompanies.Any(c => c.Identifier == companyToVerify.NIP))
+                {
+                    Entry verifiedCompanyEntry = verifiedCompanies.FirstOrDefault(c => c.Identifier == companyToVerify.NIP);
+                    if (verifiedCompanyEntry.Subjects == null || verifiedCompanyEntry.Error != null || verifiedCompanyEntry.Subjects.Count != 1)
+                    {
+                        AddInformationAboutError(ref tempWhiteListVerResult, verifiedCompanyEntry);
+                    }
+                    else
+                    {
+                        AddInformationAboutVerifiedCompany(ref tempWhiteListVerResult, companyToVerify, verifiedCompanyEntry.Subjects[0], verifyBankAccount);
+                    }
+                }
+                else
+                {
+                    tempWhiteListVerResult.VerificationStatus = WhiteListVerResultStatus.NotInVATRegisterCompany;
+                    tempWhiteListVerResult.SetVerStatusMessage(_notInVATRegiestrCompany);
+                }
+            }
+
+            return tempWhiteListVerResult;
+        }
+
+        private void AddInformationAboutVerifiedCompany(ref WhiteListVerResult tempWhiteListVerResult, InputCompany companyToVerify, Entity verifiedCompany, bool verifyBankAccount)
         {
 
             tempWhiteListVerResult.IsActiveVATPayer = verifiedCompany.StatusVat == _activeVatPayerConst;
@@ -244,7 +278,7 @@ namespace VerifyWhiteListCompany.Lib
             return _accountPattern.IsMatch(givenAccountNumber);
         }
 
-        private string GetNIPsInOneString(List<Company> companies)
+        private string GetNIPsInOneString(List<InputCompany> companies)
         {
             if (companies == null || companies.Count == 0)
             { throw new ArgumentOutOfRangeException("companies", "Companies null or empty."); }

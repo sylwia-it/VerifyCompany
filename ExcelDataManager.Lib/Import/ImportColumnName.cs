@@ -4,6 +4,6 @@
     {
         LP, //position on the list
         NIP, AccountNumber, NoteAmount, NoteID, NoteTitle, NoteDate,
-        PaymentDate,
+        PaymentDate, InvoiceDate
     }
 }
