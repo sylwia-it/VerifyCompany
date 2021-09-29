@@ -121,13 +121,8 @@ namespace ExcelDataManager.Lib.Import
                 }
 
                 DetermineColumns(worksheet);
+                ValidateColumns();
 
-
-                if (!MinimumColumnsArePresent() || (_generateNotes && !AreColumnsToGenerateNotesPresent()) || (_readInvoiceDate && !ColumnMapping.ContainsKey(ImportColumnName.InvoiceDate)))
-                {
-                    throw new SpreadSheetReaderMissingColumnsException($"Nie wszystkie kolumny są obecne w arkuszu. Brakuje: {GetMissingColumnsNames()}");
-                }
-                
                 lastProcessedItem = "Wczytano nagłówek";
 
 
@@ -178,7 +173,7 @@ namespace ExcelDataManager.Lib.Import
                         lastReadColumn = ColumnMapping[ImportColumnName.InvoiceDate];
                         var invoiceDateRange = ((Range)worksheet.Cells[i, ColumnMapping[ImportColumnName.InvoiceDate]]);
                         tempStr = invoiceDateRange.Formula.ToString();
-                      
+
                         double tempDateInDouble;
                         if (double.TryParse(tempStr, out tempDateInDouble))
                         {
@@ -230,9 +225,9 @@ namespace ExcelDataManager.Lib.Import
                         lastProcessedItem = $"Wczytano datę noty. Aktualna pozycja: wiersz {i}";
                     }
                     tempCompany.FormatErrors.AddRange(ValidateCompany(tempCompany));
-                    
+
                     CompaniesReadFromFile.Add(tempCompany);
-                 }
+                }
             }
             catch (Exception e)
             {
@@ -246,6 +241,29 @@ namespace ExcelDataManager.Lib.Import
             }
 
        
+        }
+
+        private void ValidateColumns()
+        {
+            bool areColumnsForNotesPresent = AreColumnsToGenerateNotesPresent();
+            bool isAtLeastOneColumnForNotesPresent = IsAtLeastOneColumnForNotesPresent();
+
+            if (_readInvoiceDate && !ColumnMapping.ContainsKey(ImportColumnName.InvoiceDate) && isAtLeastOneColumnForNotesPresent)
+            {
+                throw new SpreadSheetReaderMissingColumnsException($"Chcesz sprawdzić firmy na datę faktury, ale podajesz plik, który ma NOTY.");
+            }
+
+            if (!MinimumColumnsArePresent() || (_generateNotes && !areColumnsForNotesPresent) || (_readInvoiceDate && !ColumnMapping.ContainsKey(ImportColumnName.InvoiceDate)))
+            {
+                throw new SpreadSheetReaderMissingColumnsException($"Nie wszystkie kolumny są obecne w arkuszu. Brakuje: {GetMissingColumnsNames()}");
+            }
+        }
+
+        private bool IsAtLeastOneColumnForNotesPresent()
+        {
+            if (ColumnMapping.ContainsKey(ImportColumnName.NoteAmount) || ColumnMapping.ContainsKey(ImportColumnName.NoteDate) || ColumnMapping.ContainsKey(ImportColumnName.NoteID) || ColumnMapping.ContainsKey(ImportColumnName.NoteTitle))
+                return true;
+            return false;
         }
 
         private List<InputCompanyFormatError> ValidateCompany(InputCompany tempCompany)
@@ -404,14 +422,13 @@ namespace ExcelDataManager.Lib.Import
 
             string noteIDsCaption = null, noteAmountCaption = null, noteTitleCaption = null, noteDateCaption = null;
 
-            if (_generateNotes)
-            {
-                noteIDsCaption = DataFormatHelper.RemovePolishLetters(_columnsConfig.FirstOrDefault(c => c.ID == ImportColumnName.NoteID.ToString()).HeaderText.ToLower());
-                noteAmountCaption = DataFormatHelper.RemovePolishLetters(_columnsConfig.FirstOrDefault(c => c.ID == ImportColumnName.NoteAmount.ToString()).HeaderText.ToLower());
-                noteTitleCaption = DataFormatHelper.RemovePolishLetters(_columnsConfig.FirstOrDefault(c => c.ID == ImportColumnName.NoteTitle.ToString()).HeaderText.ToLower());
-                noteDateCaption = DataFormatHelper.RemovePolishLetters(_columnsConfig.FirstOrDefault(c => c.ID == ImportColumnName.NoteDate.ToString()).HeaderText.ToLower());
-                
-            } else
+            
+            noteIDsCaption = DataFormatHelper.RemovePolishLetters(_columnsConfig.FirstOrDefault(c => c.ID == ImportColumnName.NoteID.ToString()).HeaderText.ToLower());
+            noteAmountCaption = DataFormatHelper.RemovePolishLetters(_columnsConfig.FirstOrDefault(c => c.ID == ImportColumnName.NoteAmount.ToString()).HeaderText.ToLower());
+            noteTitleCaption = DataFormatHelper.RemovePolishLetters(_columnsConfig.FirstOrDefault(c => c.ID == ImportColumnName.NoteTitle.ToString()).HeaderText.ToLower());
+            noteDateCaption = DataFormatHelper.RemovePolishLetters(_columnsConfig.FirstOrDefault(c => c.ID == ImportColumnName.NoteDate.ToString()).HeaderText.ToLower());
+
+            if (!_generateNotes)
             {
                 numOfColumnToRead -= 4;
             }
@@ -445,27 +462,25 @@ namespace ExcelDataManager.Lib.Import
                 else if (_readInvoiceDate && tempCellContent.Contains(invoiceDateCaption) && !ColumnMapping.ContainsKey(ImportColumnName.InvoiceDate))
                 {
                     ColumnMapping.Add(ImportColumnName.InvoiceDate, column);
-                    
+
                 }
-                else if (_generateNotes)
+                else if (noteIDsCaption != null && tempCellContent.Equals(noteIDsCaption, StringComparison.InvariantCultureIgnoreCase) && !ColumnMapping.ContainsKey(ImportColumnName.NoteID))
                 {
-                    if (noteIDsCaption != null && tempCellContent.Equals(noteIDsCaption,  StringComparison.InvariantCultureIgnoreCase) && !ColumnMapping.ContainsKey(ImportColumnName.NoteID))
-                    {
-                        ColumnMapping.Add(ImportColumnName.NoteID, column);
-                    }
-                    else if (noteAmountCaption != null && tempCellContent.Equals(noteAmountCaption, StringComparison.InvariantCultureIgnoreCase) && !ColumnMapping.ContainsKey(ImportColumnName.NoteAmount))
-                    {
-                        ColumnMapping.Add(ImportColumnName.NoteAmount, column);
-                    }
-                    else if (noteTitleCaption != null && tempCellContent.Equals(noteTitleCaption, StringComparison.InvariantCultureIgnoreCase) && !ColumnMapping.ContainsKey(ImportColumnName.NoteTitle))
-                    {
-                        ColumnMapping.Add(ImportColumnName.NoteTitle, column);
-                    }
-                    else if (noteDateCaption != null && tempCellContent.Equals(noteDateCaption, StringComparison.InvariantCultureIgnoreCase) && !ColumnMapping.ContainsKey(ImportColumnName.NoteDate))
-                    {
-                        ColumnMapping.Add(ImportColumnName.NoteDate, column);
-                    }
+                    ColumnMapping.Add(ImportColumnName.NoteID, column);
                 }
+                else if (noteAmountCaption != null && tempCellContent.Equals(noteAmountCaption, StringComparison.InvariantCultureIgnoreCase) && !ColumnMapping.ContainsKey(ImportColumnName.NoteAmount))
+                {
+                    ColumnMapping.Add(ImportColumnName.NoteAmount, column);
+                }
+                else if (noteTitleCaption != null && tempCellContent.Equals(noteTitleCaption, StringComparison.InvariantCultureIgnoreCase) && !ColumnMapping.ContainsKey(ImportColumnName.NoteTitle))
+                {
+                    ColumnMapping.Add(ImportColumnName.NoteTitle, column);
+                }
+                else if (noteDateCaption != null && tempCellContent.Equals(noteDateCaption, StringComparison.InvariantCultureIgnoreCase) && !ColumnMapping.ContainsKey(ImportColumnName.NoteDate))
+                {
+                    ColumnMapping.Add(ImportColumnName.NoteDate, column);
+                }
+                
               
             }
         }
