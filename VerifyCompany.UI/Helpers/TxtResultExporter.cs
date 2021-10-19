@@ -30,7 +30,7 @@ namespace VerifyCompany.UI.Helpers
                 StringBuilder sB = new StringBuilder();
                 foreach (var erroredCompany in verificationResult.ErroredWhileReadingInputFileCompanies)
                 {
-                    sB.Append($"Wiersz: {erroredCompany.RowNumber} NIP: {erroredCompany.NIP} - ");
+                    sB.Append($"Wiersz:{erroredCompany.RowNumber} NIP:{erroredCompany.NIP} - ");
                     foreach (var error in erroredCompany.FormatErrors)
                     {
                         sB.Append($"{error.ToMessage()} ");
@@ -101,10 +101,10 @@ namespace VerifyCompany.UI.Helpers
                         if (whiteListCompVerResult.Value.VerificationStatus != VerifyWhiteListCompany.Lib.WhiteListVerResultStatus.ActiveVATPayerAccountOKVerSuccessfull &&
                             whiteListCompVerResult.Value.VerificationStatus != VerifyWhiteListCompany.Lib.WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull)
                         {
-                            errorCompanies.Append($"{InputCompany.GetFormattedStringFromID(whiteListCompVerResult.Key)} -- {whiteListCompVerResult.Value.ToMessage()}. Ciąg id zapytania w systemie: {whiteListCompVerResult.Value.ConfirmationResponseString}\n");
+                            errorCompanies.Append($"{InputCompany.GetFormattedStringFromID(whiteListCompVerResult.Key)} -- {whiteListCompVerResult.Value.ToMessage()} Ciąg id zapytania w systemie: {whiteListCompVerResult.Value.ConfirmationResponseString}\n");
                         }
 
-                        allResults.Append(string.Format($"{InputCompany.GetFormattedStringFromID(whiteListCompVerResult.Key)} -- {whiteListCompVerResult.Value.ToMessage()}. Ciąg id zapytania w systemie: {whiteListCompVerResult.Value.ConfirmationResponseString}\n"));
+                        allResults.Append(string.Format($"{InputCompany.GetFormattedStringFromID(whiteListCompVerResult.Key)} -- {whiteListCompVerResult.Value.ToMessage()} Ciąg id zapytania w systemie: {whiteListCompVerResult.Value.ConfirmationResponseString}\n"));
                     }
                 }
                 else
@@ -128,10 +128,10 @@ namespace VerifyCompany.UI.Helpers
                         if (whiteListCompVerResult.Value.VerificationStatus != VerifyWhiteListCompany.Lib.WhiteListVerResultStatus.ActiveVATPayerAccountOKVerSuccessfull &&
                             whiteListCompVerResult.Value.VerificationStatus != VerifyWhiteListCompany.Lib.WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull)
                         {
-                            errorCompanies.Append($"{InputCompany.GetFormattedStringFromID(whiteListCompVerResult.Key)} -- {whiteListCompVerResult.Value.ToMessage()}. Ciąg id zapytania w systemie: {whiteListCompVerResult.Value.ConfirmationResponseString}\n");
+                            errorCompanies.Append($"{InputCompany.GetFormattedStringFromID(whiteListCompVerResult.Key)} -- {whiteListCompVerResult.Value.ToMessage()} Ciąg id zapytania w systemie: {whiteListCompVerResult.Value.ConfirmationResponseString}\n");
                         }
 
-                        allResults.Append(string.Format($"{InputCompany.GetFormattedStringFromID(whiteListCompVerResult.Key)} -- {whiteListCompVerResult.Value.ToMessage()}. Ciąg id zapytania w systemie: {whiteListCompVerResult.Value.ConfirmationResponseString}\n"));
+                        allResults.Append(string.Format($"{InputCompany.GetFormattedStringFromID(whiteListCompVerResult.Key)} -- {whiteListCompVerResult.Value.ToMessage()} Ciąg id zapytania w systemie: {whiteListCompVerResult.Value.ConfirmationResponseString}\n"));
                     }
                 }
                 else

@@ -102,10 +102,9 @@ namespace ExcelDataManager.Lib.Export
                 AddNIPVerification(worksheet, headerRow, lastColumn, nipColumn, lpColumn, companiesReadFromFile, verifiedNips);
                 AddREGONVerification(worksheet, headerRow, lastColumn, nipColumn, lpColumn, companiesReadFromFile, areCompaniesActive);
                 AddWhiteListVerification(worksheet, headerRow, lastColumn, nipColumn, lpColumn, companiesReadFromFile, verifiedCompanies);
-                if (verifiedCompaniesForInvoiceDate != null && verifiedCompaniesForInvoiceDate.Count > 0)
-                {
+                
                     AddWhiteListVerificationForInvoiceDate(worksheet, headerRow, lastColumn, nipColumn, lpColumn, companiesReadFromFile, verifiedCompaniesForInvoiceDate);
-                }
+                
                 
                 AddErroredWhileReadingInputCompanies(worksheet, headerRow, lastColumn, nipColumn, lpColumn, erroredWhileReadingInputFileCompanies);
                 AddOverallResultsToFile(worksheet, headerRow, lastColumn, nipColumn, lpColumn, companiesReadFromFile, erroredWhileReadingInputFileCompanies);
@@ -221,40 +220,43 @@ namespace ExcelDataManager.Lib.Export
             ((Range)worksheet.Cells[headerRow, whiteListVerColumnForInvoiceDate]).Formula = _exportColumnsConfig.First(c => c.ID == ExportColumnName.WhiteListVerificationForInvoiceDateStatusHeader.ToString()).HeaderText;
             ((Range)worksheet.Cells[headerRow, whiteListVerColumnForInvoiceDateConfirmString]).Formula = _exportColumnsConfig.First(c => c.ID == ExportColumnName.WhiteListVerificationForInvoiceDateConfirmAndDateHeader.ToString()).HeaderText;
 
-            foreach (var company in companiesReadFromFile)
+            if (verifiedCompaniesForInvoiceDate != null && verifiedCompaniesForInvoiceDate.Count > 0)
             {
-                string nipFromCell = ((Range)worksheet.Cells[company.RowNumber, nipColumn]).Formula.ToString().Trim();
-                string lpFromCell = ((Range)worksheet.Cells[company.RowNumber, lpColumn]).Formula.ToString().Trim();
-                if (company.ID != InputCompany.GetID(company.RowNumber, lpFromCell, nipFromCell))
+                foreach (var company in companiesReadFromFile)
                 {
-                    throw new ArgumentException($"Nip z odpowiedzi serwera różny od nipu z pliku. Błąd przy zapisie wyniku białej listy do pliku na dzień faktury. Z serwera: NIP={company.NIP}, LP={company.LP}; z pliku: NIP={nipFromCell}, LP={lpFromCell}.");
-                }
-
-                if (verifiedCompaniesForInvoiceDate != null)
-                {
-                    var verificationResult = verifiedCompaniesForInvoiceDate.FirstOrDefault(vN => vN.Key == company.ID);
-
-                    if (!verificationResult.Equals(default(KeyValuePair<string, WhiteListVerResult>)))
+                    string nipFromCell = ((Range)worksheet.Cells[company.RowNumber, nipColumn]).Formula.ToString().Trim();
+                    string lpFromCell = ((Range)worksheet.Cells[company.RowNumber, lpColumn]).Formula.ToString().Trim();
+                    if (company.ID != InputCompany.GetID(company.RowNumber, lpFromCell, nipFromCell))
                     {
-                        var result = verificationResult.Value.ToMessage();
+                        throw new ArgumentException($"Nip z odpowiedzi serwera różny od nipu z pliku. Błąd przy zapisie wyniku białej listy do pliku na dzień faktury. Z serwera: NIP={company.NIP}, LP={company.LP}; z pliku: NIP={nipFromCell}, LP={lpFromCell}.");
+                    }
 
-                        ((Range)worksheet.Cells[company.RowNumber, whiteListVerColumnForInvoiceDate]).Formula = result;
-                        ((Range)worksheet.Cells[company.RowNumber, whiteListVerColumnForInvoiceDateConfirmString]).Formula = $"{verificationResult.Value.VerificationDate} - {verificationResult.Value.ConfirmationResponseString}";
+                    if (verifiedCompaniesForInvoiceDate != null)
+                    {
+                        var verificationResult = verifiedCompaniesForInvoiceDate.FirstOrDefault(vN => vN.Key == company.ID);
 
-                        if (verificationResult.Value.VerificationStatus == WhiteListVerResultStatus.ActiveVATPayerVerScuccessButGivenAccountNotVerified &&
-                            _overallVerificationResult[verificationResult.Key] != OverallResult.Error)
+                        if (!verificationResult.Equals(default(KeyValuePair<string, WhiteListVerResult>)))
                         {
-                            _overallVerificationResult[verificationResult.Key] = OverallResult.Warning;
-                        }
-                        else if (verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull && verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerAccountOKVerSuccessfull && verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerButGivenAccountWrong && verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerButHasNoAccounts)
-                        {
-                            _overallVerificationResult[verificationResult.Key] = OverallResult.Error;
+                            var result = verificationResult.Value.ToMessage();
+
+                            ((Range)worksheet.Cells[company.RowNumber, whiteListVerColumnForInvoiceDate]).Formula = result;
+                            ((Range)worksheet.Cells[company.RowNumber, whiteListVerColumnForInvoiceDateConfirmString]).Formula = $"{verificationResult.Value.VerificationDate} - {verificationResult.Value.ConfirmationResponseString}";
+
+                            if (verificationResult.Value.VerificationStatus == WhiteListVerResultStatus.ActiveVATPayerVerScuccessButGivenAccountNotVerified &&
+                                _overallVerificationResult[verificationResult.Key] != OverallResult.Error)
+                            {
+                                _overallVerificationResult[verificationResult.Key] = OverallResult.Warning;
+                            }
+                            else if (verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull && verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerAccountOKVerSuccessfull && verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerButGivenAccountWrong && verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerButHasNoAccounts)
+                            {
+                                _overallVerificationResult[verificationResult.Key] = OverallResult.Error;
+                            }
                         }
                     }
-                }
-                else
-                {
-                    ((Range)worksheet.Cells[company.RowNumber, whiteListVerColumnForInvoiceDate]).Formula = _notChecked;
+                    else
+                    {
+                        ((Range)worksheet.Cells[company.RowNumber, whiteListVerColumnForInvoiceDate]).Formula = _notChecked;
+                    }
                 }
             }
         }

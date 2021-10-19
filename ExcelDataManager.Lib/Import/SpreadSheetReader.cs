@@ -353,44 +353,48 @@ namespace ExcelDataManager.Lib.Import
             StringBuilder sB = new StringBuilder();
             if (!ColumnMapping.ContainsKey(ImportColumnName.LP))
             {
-                sB.Append("LP");
+                sB.Append("LP, ");
             }
             if (!ColumnMapping.ContainsKey(ImportColumnName.AccountNumber))
             {
-                sB.Append("Konto bankowe");
+                sB.Append("Konto bankowe, ");
             }
             if (!ColumnMapping.ContainsKey(ImportColumnName.NIP))
             {
-                sB.Append("NIP");
+                sB.Append("NIP, ");
             }
             if (!ColumnMapping.ContainsKey(ImportColumnName.PaymentDate))
             {
-                sB.Append("Data zapłaty");
+                sB.Append("Data zapłaty, ");
             }
             if (_readInvoiceDate && !ColumnMapping.ContainsKey(ImportColumnName.InvoiceDate))
             {
-                sB.Append("Data faktury");
+                sB.Append("Data faktury, ");
             }
             if (_generateNotes)
             {
+                sB.Append("Danych do generowania not tj.: ");
                 if (!ColumnMapping.ContainsKey(ImportColumnName.NoteAmount))
                 {
-                    sB.Append("Kwota noty");
+                    sB.Append("Kwota noty, ");
                 }
                 if (!ColumnMapping.ContainsKey(ImportColumnName.NoteDate))
                 {
-                    sB.Append("Data noty");
+                    sB.Append("Data noty, ");
                 }
                 if (!ColumnMapping.ContainsKey(ImportColumnName.NoteID))
                 {
-                    sB.Append("ID noty");
+                    sB.Append("ID noty, ");
                 }
                 if (!ColumnMapping.ContainsKey(ImportColumnName.NoteTitle))
                 {
-                    sB.Append("Tytuł noty");
+                    sB.Append("Tytuł noty, ");
                 }
             }
-            return sB.ToString();
+
+            string result = sB.ToString().Trim();
+            result = result.Substring(0, result.LastIndexOf(","));
+            return result;
             
         }
 
@@ -418,7 +422,7 @@ namespace ExcelDataManager.Lib.Import
             {
                 throw new SpreadSheetReaderException("Brak podstawowych kolumn w pliku konfiguracyjnym tj. konto bankowe, data zapłaty, lp, data faktury", e);
             }
-            int numOfColumnToRead = Enum.GetNames(typeof(ImportColumnName)).Length; // nip is read
+            int maxNumOfColumnToRead = Enum.GetNames(typeof(ImportColumnName)).Length; // nip is read
 
             string noteIDsCaption = null, noteAmountCaption = null, noteTitleCaption = null, noteDateCaption = null;
 
@@ -428,12 +432,8 @@ namespace ExcelDataManager.Lib.Import
             noteTitleCaption = DataFormatHelper.RemovePolishLetters(_columnsConfig.FirstOrDefault(c => c.ID == ImportColumnName.NoteTitle.ToString()).HeaderText.ToLower());
             noteDateCaption = DataFormatHelper.RemovePolishLetters(_columnsConfig.FirstOrDefault(c => c.ID == ImportColumnName.NoteDate.ToString()).HeaderText.ToLower());
 
-            if (!_generateNotes)
-            {
-                numOfColumnToRead -= 4;
-            }
-            
-            for (int column = 1; column <= 75 && ColumnMapping.Count < numOfColumnToRead; column++)
+                       
+            for (int column = 1; column <= 75 && ColumnMapping.Count < maxNumOfColumnToRead; column++)
             {
                 var tempCellContent = ((string)((Range)worksheet.Cells[HeaderRow, column]).Formula).ToLower().Trim();
                 tempCellContent = DataFormatHelper.RemovePolishLetters(tempCellContent);
@@ -480,8 +480,6 @@ namespace ExcelDataManager.Lib.Import
                 {
                     ColumnMapping.Add(ImportColumnName.NoteDate, column);
                 }
-                
-              
             }
         }
 

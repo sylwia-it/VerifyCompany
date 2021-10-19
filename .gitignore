@@ -33,3 +33,5 @@ packages
 /VerifyWhiteListCompany.Lib/obj
 /VerifyWhiteListCompany.Lib.Test/bin
 /VerifyWhiteListCompany.Lib.Test/obj
+/TransferCreator.UI/bin
+/TransferCreator.UI/obj

@@ -90,11 +90,11 @@
     },
     {
       "ID": "WhiteListVerificationForInvoiceDateStatusHeader",
-      "HeaderText": "WER. Biała Lista dla daty faktury"
+      "HeaderText": "WER. Dla daty faktury Biała Lista - Status"
     },
     {
       "ID": "WhiteListVerificationForInvoiceDateConfirmAndDateHeader",
-      "HeaderText": "WER. Biała Lista dla daty faktury - data i ciąg potwierdzający"
+      "HeaderText": "WER. Dla daty faktury Biała Lista - Data i ciąg potwierdzający"
     }
 
   ]
