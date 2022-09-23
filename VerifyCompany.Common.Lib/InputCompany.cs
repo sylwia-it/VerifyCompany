@@ -12,8 +12,16 @@ namespace VerifyCompany.Common.Lib
         private static readonly string _space = " ";
         public InputCompany()
         {
+            this.Order = -1;
             this.IsToBeVerified = true;
             
+        }
+
+        public InputCompany(int order)
+        {
+            this.Order = order;
+            this.IsToBeVerified = true;
+
         }
 
         public static string GetNIPFromID(string id)
@@ -74,6 +82,7 @@ namespace VerifyCompany.Common.Lib
             }
         }
         
+        public int Order { get; private set; }
         public string NoteID { get; set; }
         public string NoteTitle { get; set; }
         public string NoteNettoAmount { get; set; }

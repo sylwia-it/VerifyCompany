@@ -117,7 +117,7 @@ namespace ExcelDataManager.Lib.Import
 
                 if (HeaderRow == -1)
                 {
-                    throw new SpreadSheetReaderHeaderException(string.Format("Błąd formatu aruksza. W arkuszu: {0} nie znaleziono nagłówka danych. Sprawdź czy któryś nagłówek zawiera słowo 'nip'", worksheet.Name));
+                    throw new SpreadSheetReaderHeaderException(string.Format("Błąd formatu aruksza. W arkuszu: {0} nie znaleziono nagłówka danych. Sprawdź czy któryś nagłówek zawiera słowo 'nip' albo czy pierwszy arkusz w pliku to arkusz z danymi.", worksheet.Name));
                 }
 
                 DetermineColumns(worksheet);
@@ -127,10 +127,11 @@ namespace ExcelDataManager.Lib.Import
 
 
                 InputCompany tempCompany;
-
+                int orderOfCompany = 1;
                 for (int i = HeaderRow + 1; !IsEndOfTable(i, 1, worksheet); i++)
                 {
-                    tempCompany = new InputCompany();
+                    tempCompany = new InputCompany(orderOfCompany);
+                    orderOfCompany++;
                     tempCompany.RowNumber = i;
 
                     lastProcessedItem = $"Przed wczytaniem NIPu. Aktualna pozycja: wiersz {i}";

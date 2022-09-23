@@ -35,3 +35,5 @@ packages
 /VerifyWhiteListCompany.Lib.Test/obj
 /TransferCreator.UI/bin
 /TransferCreator.UI/obj
+/NotePDFExporter/bin
+/NotePDFExporter/obj

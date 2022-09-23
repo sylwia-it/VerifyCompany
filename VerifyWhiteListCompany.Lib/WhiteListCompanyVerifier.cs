@@ -80,6 +80,8 @@ namespace VerifyWhiteListCompany.Lib
                     for (int i = 0; i <= companiesToVerify.Count / _maxNumOfNipsPerOneRequest && i < _maxNumOfRequestsPerDay; i++)
                     {
                         var chunkOfCompaies = companiesToVerify.Skip(i * _maxNumOfNipsPerOneRequest).Take(_maxNumOfNipsPerOneRequest).ToList();
+                        if (chunkOfCompaies.Count == 0)
+                            continue;
                         string nipsInString = GetNIPsInOneString(chunkOfCompaies);
                         Dictionary<string, WhiteListVerResult> chunkVerification = VerifyChunkOfCompanies(chunkOfCompaies, nipsInString, DateTime.Now, verifyBankAccount);
                         foreach (var verResult in chunkVerification)

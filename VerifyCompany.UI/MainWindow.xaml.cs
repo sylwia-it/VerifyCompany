@@ -76,16 +76,16 @@ namespace VerifyCompany.UI
 
                     await Task.Factory.StartNew(() => ReadInputFile(dialog.FileName, _searchSettings, progress));
 
-                    _verificationResult = new VerificationResult();
-                    _verificationResult.ErroredWhileReadingInputFileCompanies = _companiesReadFromFile.Where(c => c.FormatErrors != null && c.FormatErrors.Count > 0).ToList();
-                    _companiesReadFromFile = _companiesReadFromFile.Where(c => c.FormatErrors == null || c.FormatErrors.Count == 0 || (c.FormatErrors.Count == 1 && c.FormatErrors.Contains(InputCompanyFormatError.BankAccountFormatError))).ToList();
-
-                    DateTime startTime = DateTime.Now;
-
                     if (_searchSettings.ImportCompaniesOnlyWithPaymentDateInColumn == true)
                     {
                         AskToSelectOnePaymentDate();
                     }
+
+                    _verificationResult = new VerificationResult();
+                    _verificationResult.ErroredWhileReadingInputFileCompanies = _companiesReadFromFile.Where(c =>  c.FormatErrors != null && c.FormatErrors.Count > 0).ToList();
+                    _companiesReadFromFile = _companiesReadFromFile.Where(c => c.FormatErrors == null || c.FormatErrors.Count == 0 || (c.FormatErrors.Count == 1 && c.FormatErrors.Contains(InputCompanyFormatError.BankAccountFormatError))).ToList();
+
+                    DateTime startTime = DateTime.Now;
 
                     _searchSettings.ScopeStart = 1;
                     _searchSettings.ScopeEnd = _companiesReadFromFile.Count;
@@ -95,7 +95,11 @@ namespace VerifyCompany.UI
                         AskToSelectScope(ref _searchSettings);
                     }
 
-                    _companiesReadFromFile = _companiesReadFromFile.Skip(_searchSettings.ScopeStart - 1).Take(_searchSettings.ScopeEnd - _searchSettings.ScopeStart + 1).ToList();
+                    var scopeToTake =  _companiesReadFromFile.Skip(_searchSettings.ScopeStart - 1).Take(_searchSettings.ScopeEnd - _searchSettings.ScopeStart + 1);
+                    int orderOfTheLastElement = scopeToTake.Last().Order;
+                    int orderOfTheFirstElement = scopeToTake.First().Order;
+                    _companiesReadFromFile = scopeToTake.ToList();
+                    _verificationResult.ErroredWhileReadingInputFileCompanies = _verificationResult.ErroredWhileReadingInputFileCompanies.Where(c => c.Order <= orderOfTheLastElement && c.Order >= orderOfTheFirstElement ).ToList();
                     
 
                     progress.Report(string.Format("{0}: Wczytano dane z pliku. Czas trwania operacji: {1}s.\n", DateTime.Now.ToLongTimeString(), Math.Round((DateTime.Now - startTime).TotalSeconds, 0)));
@@ -239,11 +243,13 @@ namespace VerifyCompany.UI
         private void AskToSelectScope(ref SearchSettings searchSettings)
         {
             AskToSelectScope askToSelectScopeWindow;
-            List<string> scopesToAnalyze = CompanyScopeHelper.GetListOfScopes(_companiesReadFromFile.Count);
+            //List<string> scopesToAnalyze = CompanyScopeHelper.GetListOfScopes(_companiesReadFromFile.Count);
+            List<string> scopesToAnalyze = CompanyScopeHelper.GetListOfScopes(_companiesReadFromFile);
             askToSelectScopeWindow = new AskToSelectScope(scopesToAnalyze);
             askToSelectScopeWindow.Owner = this;
             if (askToSelectScopeWindow.ShowDialog() == true)
             {
+                
                 searchSettings.ScopeStart = CompanyScopeHelper.GetStartScope(askToSelectScopeWindow.SelectedScope);
                 searchSettings.ScopeEnd = CompanyScopeHelper.GetEndScope(askToSelectScopeWindow.SelectedScope);
             }
@@ -380,6 +386,7 @@ namespace VerifyCompany.UI
                     doc.Name = "Errors";
                     IDocumentPaginatorSource idpSource = doc;
                     printDlg.PrintDocument(idpSource.DocumentPaginator, "Drukowanie błędów.");
+                  
                 }
                 else 
                 {

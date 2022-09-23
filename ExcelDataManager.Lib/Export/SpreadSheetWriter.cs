@@ -195,11 +195,15 @@ namespace ExcelDataManager.Lib.Export
 
                         ((Range)worksheet.Cells[company.RowNumber, whiteListVerColumn]).Formula = result;
 
-                        if (verificationResult.Value.VerificationStatus == WhiteListVerResultStatus.ActiveVATPayerVerScuccessButGivenAccountNotVerified &&
-                            _overallVerificationResult[verificationResult.Key] != OverallResult.Error)
+                        if (_overallVerificationResult[verificationResult.Key] != OverallResult.Error && (verificationResult.Value.VerificationStatus == WhiteListVerResultStatus.ActiveVATPayerVerScuccessButGivenAccountNotVerified || 
+                            verificationResult.Value.VerificationStatus == WhiteListVerResultStatus.ActiveVATPayerButGivenAccountNotOnWhiteList ||
+                            verificationResult.Value.VerificationStatus == WhiteListVerResultStatus.ActiveVATPayerButHasNoAccounts))
                         {
                             _overallVerificationResult[verificationResult.Key] = OverallResult.Warning;
                         }
+                        //else if {WhiteListVerResultStatus.
+
+                        //}
                         else if (verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerVerSuccessfull && verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerAccountOKVerSuccessfull && verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerButGivenAccountWrong && verificationResult.Value.VerificationStatus != WhiteListVerResultStatus.ActiveVATPayerButHasNoAccounts)
                         {
                             _overallVerificationResult[verificationResult.Key] = OverallResult.Error;
