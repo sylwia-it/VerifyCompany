@@ -37,3 +37,4 @@ packages
 /TransferCreator.UI/obj
 /NotePDFExporter/bin
 /NotePDFExporter/obj
+*.user

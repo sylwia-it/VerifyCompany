@@ -34,6 +34,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>pdf2.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.WindowsAPICodePack, Version=1.1.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\WindowsAPICodePack.1.1.3\lib\Microsoft.WindowsAPICodePack.dll</HintPath>
@@ -145,6 +148,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="license.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="pdf.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="pdf2.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
