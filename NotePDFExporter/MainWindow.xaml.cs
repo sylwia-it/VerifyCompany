@@ -46,7 +46,7 @@ namespace NotePDFExporter
                 };
                 if (dialog.ShowDialog() == true)
                 {
-                   await ExportFiles(dialog.FileNames);
+                   await ExportFiles(dialog.FileNames.Where(fileName => xlsFileExtension.IsMatch(fileName)).ToArray<string>());
                 }
 
                 FinishApplication();
