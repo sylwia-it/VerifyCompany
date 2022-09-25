@@ -30,9 +30,9 @@ namespace NotePDFExporter
             InitializeComponent();
         }
 
-        private void fileExportBtn_Click(object sender, RoutedEventArgs e)
+        private async void fileExportBtn_Click(object sender, RoutedEventArgs e)
         {
-            DisableControls();
+            ChangeStateOfControlsToDocsInProgress();
             try
             {
 
@@ -46,7 +46,7 @@ namespace NotePDFExporter
                 };
                 if (dialog.ShowDialog() == true)
                 {
-                    ExportFiles(dialog.FileNames);
+                   await ExportFiles(dialog.FileNames);
                 }
 
                 FinishApplication();
@@ -57,6 +57,8 @@ namespace NotePDFExporter
             {
                 MessageBox.Show(ex.Message);
             }
+
+         
         }
 
         private void FinishApplication()
@@ -68,17 +70,22 @@ namespace NotePDFExporter
 
         }
 
-        private void ExportFiles(string[] fileNames)
+        private async Task<bool> ExportFiles(string[] fileNames)
         {
             Microsoft.Office.Interop.Excel.Application app = null;
             try
             {
                 string dirToExport = CreatePDFFolderForExportedDocs(fileNames[0]);
                 app = new Microsoft.Office.Interop.Excel.Application();
-                foreach (var filePath in fileNames)
+
+                IProgress<int> progress = new Progress<int>(report =>
                 {
-                    ExportToPDF(app, filePath, dirToExport);
-                }
+                    progressLabel.Content = string.Format("{0}/{1}", report, fileNames.Length);
+                });
+
+                await Task.Factory.StartNew(() => ExportEachFile(fileNames, app, dirToExport, progress));
+
+                
             }
             catch (Exception ex)
             {
@@ -90,6 +97,18 @@ namespace NotePDFExporter
                 {
                     app.Quit();
                 }
+               
+            }
+            return true;
+        }
+
+        private void ExportEachFile(string[] fileNames, Microsoft.Office.Interop.Excel.Application app, string dirToExport, IProgress<int> progress)
+        {
+            
+            for (int i=1; i<= fileNames.Length; i++)
+            {
+                ExportToPDF(app, fileNames[i-1], dirToExport);
+                progress.Report(i);
             }
         }
 
@@ -132,9 +151,9 @@ namespace NotePDFExporter
 
         }
 
-        private void dirExportBtn_Click(object sender, RoutedEventArgs e)
+        private async void dirExportBtn_Click(object sender, RoutedEventArgs e)
         {
-            DisableControls();
+            ChangeStateOfControlsToDocsInProgress();
 
             try
             {
@@ -159,7 +178,7 @@ namespace NotePDFExporter
                         }
                     }
 
-                    ExportFiles(filesToExport.ToArray());
+                    await ExportFiles(filesToExport.ToArray());
                 }
 
                 FinishApplication();
@@ -170,10 +189,14 @@ namespace NotePDFExporter
             }
         }
 
-        private void DisableControls()
+        private void ChangeStateOfControlsToDocsInProgress()
         {
             fileExportBtn.IsEnabled = false;
             dirExportBtn.IsEnabled = false;
+            chooseToExportLabel.IsEnabled = false;  
+
+            progressLabel.Visibility = Visibility.Visible;
+            progressTitleLabel.Visibility = Visibility.Visible;
         }
     }
 }

@@ -14,10 +14,17 @@
         </Style>
     </Window.Resources>
     <StackPanel Margin="10,40,20,10">
-        <Label>Wybierz plik(i) lub folder do eksportu </Label>
+        <Label x:Name="chooseToExportLabel">Wybierz plik(i) lub folder do eksportu </Label>
         <StackPanel Orientation="Horizontal" >
             <Button x:Name="fileExportBtn" Click="fileExportBtn_Click" Style="{StaticResource SelectionButtonStyle}">Eksportuj PLIK(i) do PDF</Button>
             <Button x:Name="dirExportBtn" Style="{StaticResource SelectionButtonStyle}" Click="dirExportBtn_Click">Eksportuj pliki z FOLDERU(katalog) do PDF</Button>
+
+            
+            
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" >
+            <Label x:Name="progressTitleLabel" Visibility="Collapsed">Trwa Eksport plików. Postęp:</Label>
+            <Label x:Name="progressLabel" Visibility="Collapsed">0/0</Label>
         </StackPanel>
         
     </StackPanel>
